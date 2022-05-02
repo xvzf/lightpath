@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "resource",
+    srcs = ["resource.go"],
+    importpath = "github.com/xvzf/lightpath/pkg/resource",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_envoyproxy_go_control_plane//envoy/config/cluster/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//envoy/config/core/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//envoy/config/endpoint/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//envoy/config/listener/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//envoy/config/route/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//envoy/extensions/filters/network/http_connection_manager/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//pkg/cache/types:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//pkg/cache/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//pkg/resource/v3:go_default_library",
+        "@com_github_envoyproxy_go_control_plane//pkg/wellknown:go_default_library",
+        "@org_golang_google_protobuf//types/known/anypb:go_default_library",
+        "@org_golang_google_protobuf//types/known/durationpb:go_default_library",
+    ],
+)
