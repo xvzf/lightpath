@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    branches:
+    - 'main'
+    tags:
+    - '*'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.18.0'
+
+      - name: Test
+        run: make default
+
+      - name: Extract Tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/v}
+
+      - name: Build&Push tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          make DOCKER_BUILDX_ARGS=--push container-image-${TAG}
+
+      - name: Build&Push latest release
+        if: not startsWith(github.ref, 'refs/tags/v')
+        run: make DOCKER_BUILDX_ARGS=--push container-image-latest
+
+  publish-gh-release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      # - name: Extract Tag
+      #   id: vars
+      #   run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/v}
+      # - name: Build manifests
+      #   env:
+      #     RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+      #   run: |
+      #     set -eu -o pipefail
+      #     kustomize build config/default \
+      #       | sed "s#controller:latest#${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${RELEASE_VERSION}#g" \
+      #       > manifests.yaml
+      #     kustomize build config/crd > crds.yaml
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        # with:
+        #   files: |
+        #     composable.yaml
+        #     crds.yaml
