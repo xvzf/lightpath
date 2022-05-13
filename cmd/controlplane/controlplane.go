@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/xvzf/lightpath/internal/lightpath/state"
+	"github.com/xvzf/lightpath/pkg/state"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
