@@ -2,67 +2,65 @@ package main
 
 import (
 	"context"
-	"flag"
-	"os"
+	"time"
 
-	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
-	envoy_server "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/test/v3"
-	"github.com/xvzf/lightpath/internal/version"
-	"github.com/xvzf/lightpath/pkg/logger"
-	"github.com/xvzf/lightpath/pkg/resource"
-	"github.com/xvzf/lightpath/pkg/server"
-	"k8s.io/klog/v2"
+	"github.com/xvzf/lightpath/internal/lightpath/state"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/client-go/informers"
+	proxyapis "k8s.io/kubernetes/pkg/proxy/apis"
+	proxyconfig "k8s.io/kubernetes/pkg/proxy/config"
 )
 
-var (
-	l      logger.Logger
-	port   uint
-	nodeID string
+const (
+	RESYNC_INTERVAL = 4 * time.Second
 )
 
-func init() {
-	// The port that this xDS server listens on
-	flag.UintVar(&port, "port", 18000, "xDS management server port")
-
-	// Tell Envoy to use this Node ID
-	flag.StringVar(&nodeID, "nodeID", "test-id", "Node ID")
-
-	// Configure logging flags
-	klog.InitFlags(nil)
-	flag.Set("v", "3")
-}
-
-func main() {
-	flag.Parse()
-
-	// Configure log level
-	l = logger.New("lightpath")
-	defer klog.Flush()
-
-	// Print version string
-	l.Infof(version.GetVersion())
-
-	// Create a cache
-	cache := cache.NewSnapshotCache(false, cache.IDHash{}, l)
-
-	// Create the snapshot that we'll serve to Envoy
-	snapshot := resource.GenerateSnapshot()
-	if err := snapshot.Consistent(); err != nil {
-		l.Errorf("snapshot inconsistency: %+v\n%+v", snapshot, err)
-		os.Exit(1)
-	}
-	l.Debugf("will serve snapshot %+v", snapshot)
-
-	// Add the snapshot to the cache
-	if err := cache.SetSnapshot(context.Background(), nodeID, snapshot); err != nil {
-		l.Errorf("snapshot error %q for %+v", err, snapshot)
-		os.Exit(1)
+func run(ctx context.Context) error {
+	// Create clients
+	client, _, err := createClients("/Users/xvzf/.kube/config") // FIXME
+	if err != nil {
+		return err
 	}
 
-	// Run the xDS server
-	ctx := context.Background()
-	cb := &test.Callbacks{Debug: true}
-	srv := envoy_server.NewServer(ctx, cache, cb)
-	server.RunServer(ctx, srv, port)
+	// We're not interested in explicitly ignored services
+	noProxyName, err := labels.NewRequirement(proxyapis.LabelServiceProxyName, selection.DoesNotExist, nil)
+	if err != nil {
+		return err
+	}
+	// We're also not interested in headless services (so far, might be interesting in the future)
+	noHeadlessEndpoints, err := labels.NewRequirement(v1.IsHeadlessService, selection.DoesNotExist, nil)
+	if err != nil {
+		return err
+	}
+
+	labelSelector := labels.NewSelector()
+	labelSelector = labelSelector.Add(*noProxyName, *noHeadlessEndpoints)
+
+	// pass labelselector options to informer factory
+	informerFactory := informers.NewSharedInformerFactoryWithOptions(
+		client,
+		RESYNC_INTERVAL,
+		informers.WithTweakListOptions(func(options *metav1.ListOptions) {
+			options.LabelSelector = labelSelector.String()
+		}),
+	)
+
+	// Subscribe to updates on services & endpoints
+	serviceConfig := proxyconfig.NewServiceConfig(informerFactory.Core().V1().Services(), RESYNC_INTERVAL)
+	endpointSliceConfig := proxyconfig.NewEndpointSliceConfig(informerFactory.Discovery().V1().EndpointSlices(), RESYNC_INTERVAL)
+
+	stateSubscriber := state.New(state.ServiceStateSubscriberOpts{
+		Log: l.WithValues("component", "state-suscriber"),
+	})
+
+	serviceConfig.RegisterEventHandler(stateSubscriber)
+	endpointSliceConfig.RegisterEventHandler(stateSubscriber)
+
+	informerFactory.Start(ctx.Done())
+
+	<-ctx.Done()
+	return nil
 }

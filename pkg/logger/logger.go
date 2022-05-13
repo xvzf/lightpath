@@ -23,6 +23,8 @@ type Logger interface {
 
 	// WithValues annotate klog
 	WithValues(withKeysAndValues ...interface{}) Logger
+
+	GetLogger() logr.Logger
 }
 
 type logger struct {
@@ -45,6 +47,10 @@ func (l *logger) WithValues(withKeysAndValues ...interface{}) Logger {
 		name: l.name,
 		logr: l.logr.WithValues(withKeysAndValues...),
 	}
+}
+
+func (l *logger) GetLogger() logr.Logger {
+	return l.logr
 }
 
 // Verbosity levels following https://kubernetes.io/docs/concepts/cluster-administration/system-logs/

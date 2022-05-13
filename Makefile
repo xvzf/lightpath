@@ -1,4 +1,4 @@
-.PHONY: clean lint test build
+.PHONY: clean lint test build k8s-up k8s-down
 
 BIN_NAME := controlplane
 MAIN_DIRECTORY := ./cmd/controlplane
@@ -35,7 +35,6 @@ build: clean dist
 	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -v \
 		-ldflags '-X "${GIT_REPO}/internal/version.commit=${SHA}" -X "${GIT_REPO}/internal/version.date=${BUILD_DATE}" -X "${GIT_REPO}/internal/version.tag=${TAG_NAME}"' \
 		-o "./dist/${GOOS}/${GOARCH}/${BIN_NAME}" ${MAIN_DIRECTORY}
-
 		
 build-linux-arm64: export GOOS := linux
 build-linux-arm64: export GOARCH := arm64
@@ -57,3 +56,6 @@ k8s-up:
 .PHONY: kind-down
 k8s-down:
 	kind delete cluster --name=lightpath-ci
+
+run: default kind-up
+	./dist/$(GOOS)/$(GOARCH)/$(BIN_NAME) -v=2
