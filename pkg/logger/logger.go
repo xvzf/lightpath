@@ -34,7 +34,9 @@ type logger struct {
 func New(name string) Logger {
 	return &logger{
 		name: name,
-		logr: klogr.New().WithName(name),
+		logr: klogr.NewWithOptions(
+			klogr.WithFormat(klogr.FormatKlog),
+		).WithName(name),
 	}
 }
 
