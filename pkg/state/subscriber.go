@@ -1,9 +1,9 @@
 package state
 
 import (
-	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/go-logr/logr"
 	"github.com/xvzf/lightpath/pkg/logger"
+	"github.com/xvzf/lightpath/pkg/state/snapshot"
 	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	proxyconfig "k8s.io/kubernetes/pkg/proxy/config"
@@ -12,12 +12,6 @@ import (
 type ServiceStateSubscriber interface {
 	proxyconfig.EndpointSliceHandler
 	proxyconfig.ServiceHandler
-
-	// Sync immediately syncs the proxy state
-	Sync()
-
-	// SyncLoop() runs continously
-	SyncLoop()
 }
 
 type ServiceStateSubscriberOpts struct {
@@ -25,19 +19,13 @@ type ServiceStateSubscriberOpts struct {
 }
 
 type serviceStateSubscriber struct {
-	snapshotCache cache.SnapshotCache
-	log           logr.Logger
+	log logr.Logger
 
 	clusterState *clusterServiceStateCache
 }
 
 func New(opts ServiceStateSubscriberOpts) ServiceStateSubscriber {
 	return &serviceStateSubscriber{
-		snapshotCache: cache.NewSnapshotCache(
-			true, // Enable Aggregate discovery service -> xDS combined over one GRPC stream
-			cache.IDHash{},
-			opts.Log.WithValues("sub-component", "snapshotcache"),
-		),
 		log: opts.Log.GetLogger(),
 
 		// Init datastructures
@@ -75,6 +63,6 @@ func (cs *serviceStateSubscriber) OnEndpointSliceDelete(remove *discoveryv1.Endp
 
 func (cs *serviceStateSubscriber) OnEndpointSlicesSynced() {} // noop
 
-func (cs *serviceStateSubscriber) Sync() {}
-
-func (cs *serviceStateSubscriber) SyncLoop() {}
+func (cs *serviceStateSubscriber) Snapshot() *snapshot.Snapshot {
+	return nil
+}

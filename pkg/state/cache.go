@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/go-logr/logr"
+	"github.com/xvzf/lightpath/pkg/state/snapshot"
 	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 )
@@ -126,4 +127,22 @@ func (c *clusterServiceStateCache) DeepCopy() *clusterServiceStateCache {
 		newCopy.services[k] = v.DeepCopy()
 	}
 	return newCopy
+}
+
+func (orig *clusterServiceStateCache) Snapshot() *snapshot.Snapshot {
+	// Deep copy and don't block -> updates can go in again
+	orig.m.Lock()
+	c := orig.DeepCopy()
+	orig.m.Unlock()
+
+	snap := &snapshot.Snapshot{
+		Services: make([]*snapshot.Service, 0, len(c.services)),
+	}
+
+	// Computate Snapshot from k8s resources
+	for _, svc := range c.services {
+		snap.Services = append(snap.Services, svc.Snapshot())
+	}
+
+	return snap
 }

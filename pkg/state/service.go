@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/xvzf/lightpath/pkg/state/snapshot"
 	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 )
@@ -148,4 +149,20 @@ func (s *serviceContainer) deleteEndpointSlice(remove *discoveryv1.EndpointSlice
 	}
 
 	return ENDPOINTSLICE_OPERATION_STATUS_NOOP
+}
+
+func (s *serviceContainer) Snapshot() *snapshot.Service {
+	s.m.Lock()
+	defer s.m.Unlock()
+
+	svc := &snapshot.Service{
+		Obj:            s.obj,
+		EndpointSlices: make([]*discoveryv1.EndpointSlice, 0, len(s.endpointSlices)),
+	}
+
+	for _, endpointslice := range s.endpointSlices {
+		svc.EndpointSlices = append(svc.EndpointSlices, endpointslice)
+	}
+
+	return svc
 }
