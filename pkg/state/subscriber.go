@@ -64,5 +64,5 @@ func (cs *serviceStateSubscriber) OnEndpointSliceDelete(remove *discoveryv1.Endp
 func (cs *serviceStateSubscriber) OnEndpointSlicesSynced() {} // noop
 
 func (cs *serviceStateSubscriber) Snapshot() *snapshot.Snapshot {
-	return nil
+	return cs.clusterState.Snapshot()
 }
