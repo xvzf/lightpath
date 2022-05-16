@@ -1,12 +1,17 @@
-package configprovider
+package translations
 
 import (
 	"strings"
+	"time"
 
 	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/xvzf/lightpath/pkg/state/snapshot"
 	"google.golang.org/protobuf/types/known/durationpb"
+)
+
+const (
+	DEFAULT_CONNECT_TIMEOUT = 5 * time.Second
 )
 
 // getClustersFromServiceSnapshot generates one envoy cluster for each service
@@ -25,7 +30,7 @@ func getClustersFromServiceSnapshot(svcSnap *snapshot.Service) ([]*cluster.Clust
 		res = append(res, &cluster.Cluster{
 			Name:                 clusterName,
 			ConnectTimeout:       durationpb.New(DEFAULT_CONNECT_TIMEOUT),          // FIXME make configureable with annotation
-			ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS}, // retireve endpoints from EDS
+			ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS}, // retrieve endpoints from EDS
 			LbPolicy:             cluster.Cluster_ROUND_ROBIN,                      // FIXME make configureable
 			LoadAssignment: &endpoint.ClusterLoadAssignment{
 				ClusterName: clusterName,

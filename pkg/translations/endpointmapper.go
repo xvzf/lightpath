@@ -1,4 +1,4 @@
-package configprovider
+package translations
 
 import (
 	"errors"
@@ -22,15 +22,6 @@ func mapKubeEndpointToEnvoyLbEndpoint(protocol v1.Protocol, port int32, kubeEndp
 		return nil, errors.New("at least one address has to be present")
 	}
 
-	// Map kubernetes protocol to envoy protocol
-	var envoyProtocol core.SocketAddress_Protocol
-	switch protocol {
-	case v1.ProtocolUDP:
-		envoyProtocol = core.SocketAddress_TCP
-	default:
-		envoyProtocol = core.SocketAddress_TCP
-	}
-
 	// Map healthstatus to envoy
 	var envoyHealthStatus core.HealthStatus
 	if kubeEndpoint.Conditions.Serving != nil && kubeEndpoint.Conditions.Terminating != nil && *kubeEndpoint.Conditions.Serving {
@@ -51,7 +42,7 @@ func mapKubeEndpointToEnvoyLbEndpoint(protocol v1.Protocol, port int32, kubeEndp
 				Address: &core.Address{
 					Address: &core.Address_SocketAddress{
 						SocketAddress: &core.SocketAddress{
-							Protocol: envoyProtocol,
+							Protocol: mapKubeProtocolToEnvoyProtocol(protocol),
 							Address:  kubeEndpoint.Addresses[0],
 							PortSpecifier: &core.SocketAddress_PortValue{
 								PortValue: uint32(port),
