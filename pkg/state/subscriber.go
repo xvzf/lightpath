@@ -12,6 +12,9 @@ import (
 type ServiceStateSubscriber interface {
 	proxyconfig.EndpointSliceHandler
 	proxyconfig.ServiceHandler
+
+	Notify() chan struct{}
+	Snapshot() *snapshot.Snapshot
 }
 
 type ServiceStateSubscriberOpts struct {
@@ -22,6 +25,7 @@ type serviceStateSubscriber struct {
 	log logr.Logger
 
 	clusterState *clusterServiceStateCache
+	notifyChan   chan struct{}
 }
 
 func New(opts ServiceStateSubscriberOpts) ServiceStateSubscriber {
@@ -29,36 +33,53 @@ func New(opts ServiceStateSubscriberOpts) ServiceStateSubscriber {
 		log: opts.Log.GetLogger(),
 
 		// Init datastructures
+		notifyChan: make(chan struct{}),
 		clusterState: NewClusterServiceStateCache(ClusterServiceStateOpts{
 			Log: opts.Log.GetLogger().WithValues("sub-component", "cluster-state"),
 		}),
 	}
 }
 
+func (cs *serviceStateSubscriber) Notify() chan struct{} {
+	return cs.notifyChan
+}
+
 func (cs *serviceStateSubscriber) OnServiceAdd(new *v1.Service) {
-	cs.clusterState.UpdateServices(new, false)
+	if cs.clusterState.UpdateServices(new, false) {
+		cs.notifyChan <- struct{}{}
+	}
 }
 
 func (cs *serviceStateSubscriber) OnServiceUpdate(_, new *v1.Service) {
-	cs.clusterState.UpdateServices(new, false)
+	if cs.clusterState.UpdateServices(new, false) {
+		cs.notifyChan <- struct{}{}
+	}
 }
 
 func (cs *serviceStateSubscriber) OnServiceDelete(remove *v1.Service) {
-	cs.clusterState.UpdateServices(remove, true)
+	if cs.clusterState.UpdateServices(remove, true) {
+		cs.notifyChan <- struct{}{}
+	}
 }
 
 func (cs *serviceStateSubscriber) OnServiceSynced() {} // noop
 
 func (cs *serviceStateSubscriber) OnEndpointSliceAdd(new *discoveryv1.EndpointSlice) {
-	cs.clusterState.UpdatEndpointSlice(new, false)
+	if cs.clusterState.UpdatEndpointSlice(new, false) {
+		cs.notifyChan <- struct{}{}
+	}
 }
 
 func (cs *serviceStateSubscriber) OnEndpointSliceUpdate(_, new *discoveryv1.EndpointSlice) {
-	cs.clusterState.UpdatEndpointSlice(new, false)
+	if cs.clusterState.UpdatEndpointSlice(new, false) {
+		cs.notifyChan <- struct{}{}
+	}
 }
 
 func (cs *serviceStateSubscriber) OnEndpointSliceDelete(remove *discoveryv1.EndpointSlice) {
-	cs.clusterState.UpdatEndpointSlice(remove, true)
+	if cs.clusterState.UpdatEndpointSlice(remove, true) {
+		cs.notifyChan <- struct{}{}
+	}
 }
 
 func (cs *serviceStateSubscriber) OnEndpointSlicesSynced() {} // noop

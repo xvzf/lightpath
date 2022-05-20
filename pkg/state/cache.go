@@ -8,6 +8,7 @@ import (
 	"github.com/xvzf/lightpath/pkg/state/snapshot"
 	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
+	"k8s.io/klog"
 )
 
 type ClusterServiceStateOpts struct {
@@ -30,25 +31,24 @@ func NewClusterServiceStateCache(opts ClusterServiceStateOpts) *clusterServiceSt
 }
 
 // UpdateServices handles service update events origining form a Kubernetes informer.
-func (c *clusterServiceStateCache) UpdateServices(service *v1.Service, delete bool) {
+func (c *clusterServiceStateCache) UpdateServices(service *v1.Service, delete bool) bool {
 	c.m.Lock()
 	defer c.m.Unlock()
 
 	if service == nil {
 		c.log.V(0).Error(errors.New("nullptr"), "Requested update operation with invalid reference")
-		return
+		return false
 	}
 
 	if delete {
-		c.deleteService(service)
-		return
+		return c.deleteService(service)
 	}
 
-	c.updateService(service)
+	return c.updateService(service)
 }
 
 // updateService handles addition or in-place updates of new services.
-func (c *clusterServiceStateCache) updateService(new *v1.Service) {
+func (c *clusterServiceStateCache) updateService(new *v1.Service) bool {
 	c.log.V(5).Info("Updated service call started", "name", new.Name)
 	existing, ok := c.services[new.Name]
 
@@ -59,7 +59,7 @@ func (c *clusterServiceStateCache) updateService(new *v1.Service) {
 			"new_resource_version", new.ResourceVersion,
 			"existing_resource_version", existing.obj.ResourceVersion,
 		)
-		return
+		return false
 	}
 
 	if ok {
@@ -67,7 +67,7 @@ func (c *clusterServiceStateCache) updateService(new *v1.Service) {
 		err := existing.Update(new)
 		if err != nil {
 			c.log.V(0).Error(err, "Service updated failed")
-			return
+			return false
 		}
 		c.log.V(2).Info("Updated service", "name", new.Name)
 	} else {
@@ -76,28 +76,32 @@ func (c *clusterServiceStateCache) updateService(new *v1.Service) {
 		c.log.V(2).Info("Added service", "name", new.Name)
 	}
 	c.log.V(5).Info("Updated service call completed", "name", new.Name)
+	return true
 }
 
 // deleteService handles deletion of an existing service
-func (c *clusterServiceStateCache) deleteService(remove *v1.Service) {
+func (c *clusterServiceStateCache) deleteService(remove *v1.Service) bool {
 	c.log.V(5).Info("Delete service call started", "name", remove.Name)
 	if _, ok := c.services[remove.Name]; ok {
 		delete(c.services, remove.Name)
 		c.log.V(2).Info("Deleted service", "name", remove.Name)
+	} else {
+		c.log.V(1).Info("Deleting service failed (not in-memory)", remove.Name)
+		return false
 	}
-	c.log.V(1).Info("Deleting service failed (not in-memory)", remove.Name)
 	c.log.V(5).Info("Delete service call completed", "name", remove.Name)
+	return true
 }
 
-func (c *clusterServiceStateCache) UpdatEndpointSlice(endpointslice *discoveryv1.EndpointSlice, delete bool) {
+func (c *clusterServiceStateCache) UpdatEndpointSlice(endpointslice *discoveryv1.EndpointSlice, delete bool) bool {
 	if endpointslice == nil {
 		c.log.V(0).Error(errors.New("nullptr"), "Requested update operation with invalid reference")
-		return
+		return false
 	}
 	svcName, ok := endpointslice.Labels[discoveryv1.LabelServiceName]
 	if !ok {
 		c.log.V(1).Info("Endpointslice has no service label attached", "name", endpointslice.Name)
-		return
+		return false
 	}
 	c.m.Lock()
 	svc, ok := c.services[svcName]
@@ -107,12 +111,15 @@ func (c *clusterServiceStateCache) UpdatEndpointSlice(endpointslice *discoveryv1
 		res := svc.UpdatEndpointslices(endpointslice, delete)
 		if res > ENDPOINTSLICE_OPERATION_STATUS_DELETED {
 			c.log.V(1).Info(res.String(), "name", endpointslice.Name)
+			return false
 		} else if res > ENDPOINTSLICE_OPERATION_STATUS_NOOP {
 			c.log.V(2).Info(res.String(), "name", endpointslice.Name)
+			return false
 		}
 	} else {
 		c.log.V(1).Info("Received EndpointSlice for non-registered service")
 	}
+	return true
 }
 
 func (c *clusterServiceStateCache) DeepCopy() *clusterServiceStateCache {
@@ -131,9 +138,9 @@ func (c *clusterServiceStateCache) DeepCopy() *clusterServiceStateCache {
 
 func (orig *clusterServiceStateCache) Snapshot() *snapshot.Snapshot {
 	// Deep copy and don't block -> updates can go in again
-	orig.m.Lock()
+	klog.V(9).Info("Aquiring lock for clusterServiceStateCache")
 	c := orig.DeepCopy()
-	orig.m.Unlock()
+	klog.V(9).Info("Releassed lock for clusterServiceStateCache")
 
 	snap := &snapshot.Snapshot{
 		Services: make([]*snapshot.Service, 0, len(c.services)),

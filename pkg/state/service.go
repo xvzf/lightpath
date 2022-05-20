@@ -7,6 +7,7 @@ import (
 	"github.com/xvzf/lightpath/pkg/state/snapshot"
 	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
+	"k8s.io/klog"
 )
 
 // serviceContainers map to clusters (CDS), listeners (LDS) , routes (RDS)
@@ -152,7 +153,9 @@ func (s *serviceContainer) deleteEndpointSlice(remove *discoveryv1.EndpointSlice
 }
 
 func (s *serviceContainer) Snapshot() *snapshot.Service {
+	klog.V(9).Info("Aquiring lock for serviceContailer")
 	s.m.Lock()
+	defer klog.V(9).Info("Releasing lock for serviceContailer")
 	defer s.m.Unlock()
 
 	svc := &snapshot.Service{
