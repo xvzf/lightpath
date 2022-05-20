@@ -12,7 +12,7 @@ func createClients(kubeconfig string) (clientset.Interface, corev1.EventsGetter,
 	var kubeConfig *rest.Config
 	var err error
 
-	if len(kubeconfig) == 0 {
+	if kubeconfig == "" {
 		klog.InfoS("Neither kubeconfig file nor master URL was specified, falling back to in-cluster config")
 		kubeConfig, err = rest.InClusterConfig()
 	} else {

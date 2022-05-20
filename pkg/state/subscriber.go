@@ -44,40 +44,40 @@ func (cs *serviceStateSubscriber) Notify() chan struct{} {
 	return cs.notifyChan
 }
 
-func (cs *serviceStateSubscriber) OnServiceAdd(new *v1.Service) {
-	if cs.clusterState.UpdateServices(new, false) {
+func (cs *serviceStateSubscriber) OnServiceAdd(svc *v1.Service) {
+	if cs.clusterState.UpdateServices(svc, false) {
 		cs.notifyChan <- struct{}{}
 	}
 }
 
-func (cs *serviceStateSubscriber) OnServiceUpdate(_, new *v1.Service) {
-	if cs.clusterState.UpdateServices(new, false) {
+func (cs *serviceStateSubscriber) OnServiceUpdate(_, svc *v1.Service) {
+	if cs.clusterState.UpdateServices(svc, false) {
 		cs.notifyChan <- struct{}{}
 	}
 }
 
-func (cs *serviceStateSubscriber) OnServiceDelete(remove *v1.Service) {
-	if cs.clusterState.UpdateServices(remove, true) {
+func (cs *serviceStateSubscriber) OnServiceDelete(svc *v1.Service) {
+	if cs.clusterState.UpdateServices(svc, true) {
 		cs.notifyChan <- struct{}{}
 	}
 }
 
 func (cs *serviceStateSubscriber) OnServiceSynced() {} // noop
 
-func (cs *serviceStateSubscriber) OnEndpointSliceAdd(new *discoveryv1.EndpointSlice) {
-	if cs.clusterState.UpdatEndpointSlice(new, false) {
+func (cs *serviceStateSubscriber) OnEndpointSliceAdd(es *discoveryv1.EndpointSlice) {
+	if cs.clusterState.UpdatEndpointSlice(es, false) {
 		cs.notifyChan <- struct{}{}
 	}
 }
 
-func (cs *serviceStateSubscriber) OnEndpointSliceUpdate(_, new *discoveryv1.EndpointSlice) {
-	if cs.clusterState.UpdatEndpointSlice(new, false) {
+func (cs *serviceStateSubscriber) OnEndpointSliceUpdate(_, es *discoveryv1.EndpointSlice) {
+	if cs.clusterState.UpdatEndpointSlice(es, false) {
 		cs.notifyChan <- struct{}{}
 	}
 }
 
-func (cs *serviceStateSubscriber) OnEndpointSliceDelete(remove *discoveryv1.EndpointSlice) {
-	if cs.clusterState.UpdatEndpointSlice(remove, true) {
+func (cs *serviceStateSubscriber) OnEndpointSliceDelete(es *discoveryv1.EndpointSlice) {
+	if cs.clusterState.UpdatEndpointSlice(es, true) {
 		cs.notifyChan <- struct{}{}
 	}
 }

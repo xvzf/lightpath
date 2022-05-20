@@ -71,7 +71,6 @@ func New(opts XdsServerOpts) (XdsServer, error) {
 			}),
 		),
 	}, nil
-
 }
 
 func (s *xdsServer) UpdateSnapshot(ctx context.Context, snapshot *cache.Snapshot) error {
@@ -79,9 +78,8 @@ func (s *xdsServer) UpdateSnapshot(ctx context.Context, snapshot *cache.Snapshot
 		klog.ErrorS(err, "Inconsistent snapshot, skipping serving")
 		return err
 	}
-	klog.Info("Updated xDS snapshot")
-	s.cache.SetSnapshot(ctx, s.nodeID, snapshot)
-	return nil
+	klog.Info("Updating xDS snapshot")
+	return s.cache.SetSnapshot(ctx, s.nodeID, snapshot)
 }
 
 func (s *xdsServer) Start(ctx context.Context) error {

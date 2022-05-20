@@ -17,10 +17,8 @@ import (
 
 func getTcpProxyFilterConfig(svcObj *v1.Service, ipFamily v1.IPFamily, protocol v1.Protocol, port int32) *anypb.Any {
 	proxy := &tcpproxy.TcpProxy{
-		StatPrefix: "destination",
-		ClusterSpecifier: &tcpproxy.TcpProxy_Cluster{
-			Cluster: fmt.Sprintf("%s-%s", svcObj.GetUID(), idxFamilyProtocolPort(ipFamily, protocol, port)), //retrieve cluster based on IPv4/IPv6 & ports
-		},
+		StatPrefix:       "destination",
+		ClusterSpecifier: &tcpproxy.TcpProxy_Cluster{},
 	}
 
 	pbst, err := anypb.New(proxy)
@@ -32,7 +30,6 @@ func getTcpProxyFilterConfig(svcObj *v1.Service, ipFamily v1.IPFamily, protocol 
 }
 
 func getTCPListener(svcObj *v1.Service, servicePort v1.ServicePort) []*listener.Listener {
-
 	res := []*listener.Listener{}
 
 	// ClusterIP(s)
@@ -90,5 +87,4 @@ func getListenerFromServiceSnapshpt(svcSnap *snapshot.Service) []*listener.Liste
 	}
 
 	return listeners
-
 }

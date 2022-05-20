@@ -56,9 +56,8 @@ func mapKubeEndpointToEnvoyLbEndpoint(protocol v1.Protocol, port int32, kubeEndp
 }
 
 // mapKubeEndpointsToEnvoyEndpoints maps kubernetes endpoints to envoy endpoints.
-// Returns a map of zone -> []endpoint.LbEndpoints
+// Returns a map of zone -> []endpoint.LbEndpoints.
 func mapKubeEndpointsToEnvoyEndpoints(protocol v1.Protocol, port int32, kubeEndpoints *[]discoveryv1.Endpoint) (map[string][]*endpoint.LbEndpoint, error) {
-
 	res := make(map[string][]*endpoint.LbEndpoint)
 	if kubeEndpoints == nil {
 		klog.Warning("kubeEndpoints is nil")
@@ -69,7 +68,7 @@ func mapKubeEndpointsToEnvoyEndpoints(protocol v1.Protocol, port int32, kubeEndp
 		// Extract zone info
 		zone := pointer.StringDeref(kubeEndpoint.Zone, "default")
 		// convert endpoint
-		envoyEndpoint, err := mapKubeEndpointToEnvoyLbEndpoint(protocol, port, &kubeEndpoint)
+		envoyEndpoint, err := mapKubeEndpointToEnvoyLbEndpoint(protocol, port, &kubeEndpoint) //nolint
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +87,7 @@ func mergeZoneMappedEndpoints(a, b map[string][]*endpoint.LbEndpoint) map[string
 	merged := a
 	for k, v := range b {
 		if _, ok := merged[k]; ok {
-			merged[k] = append(a[k], v...)
+			merged[k] = append(merged[k], v...)
 		} else {
 			merged[k] = b[k]
 		}

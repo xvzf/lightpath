@@ -10,7 +10,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// EnvoySnaphsotFromKubeSnapshot generates an Envoy configuration snapshot servable to xDS APIs from Kubernetes Service/EndpointSlices
+// EnvoySnaphsotFromKubeSnapshot generates an Envoy configuration snapshot servable to xDS APIs from Kubernetes Service/EndpointSlices.
 func EnvoySnapshotFromKubeSnapshot(snap *snapshot.Snapshot) (*cache.Snapshot, error) {
 	// Vars
 	clusters := []types.Resource{}

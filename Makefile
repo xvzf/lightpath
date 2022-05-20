@@ -20,6 +20,7 @@ default: clean lint test build
 
 lint:
 	go vet ./...
+	golangci-lint run
 
 clean:
 	rm -rf cover.out
@@ -58,4 +59,4 @@ k8s-down:
 	kind delete cluster --name=lightpath-ci
 
 run: default kind-up
-	./dist/$(GOOS)/$(GOARCH)/$(BIN_NAME) -v=2
+	./dist/$(GOOS)/$(GOARCH)/$(BIN_NAME) -v=3

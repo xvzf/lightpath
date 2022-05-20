@@ -32,7 +32,7 @@ type logger struct {
 	logr logr.Logger
 }
 
-// New creates a new logger
+// New creates a new logger.
 func New(name string) Logger {
 	return &logger{
 		name: name,

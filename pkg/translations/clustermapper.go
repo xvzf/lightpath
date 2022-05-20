@@ -1,7 +1,6 @@
 package translations
 
 import (
-	"strings"
 	"time"
 
 	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -26,12 +25,12 @@ func getClustersFromServiceSnapshot(svcSnap *snapshot.Service) ([]*cluster.Clust
 
 	// Create service specific clusters
 	for idx, endpoints := range mappedLocalityEndpoints {
-		clusterName := strings.Join([]string{string(svcSnap.Obj.GetUID()), idx}, "-")
+		clusterName := string(svcSnap.Obj.GetUID()) + "-" + idx
 		res = append(res, &cluster.Cluster{
 			Name:                 clusterName,
-			ConnectTimeout:       durationpb.New(DEFAULT_CONNECT_TIMEOUT),          // FIXME make configureable with annotation
+			ConnectTimeout:       durationpb.New(DEFAULT_CONNECT_TIMEOUT),          // FIXME make configurable with annotation
 			ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS}, // retrieve endpoints from EDS
-			LbPolicy:             cluster.Cluster_ROUND_ROBIN,                      // FIXME make configureable
+			LbPolicy:             cluster.Cluster_ROUND_ROBIN,                      // FIXME make configurable
 			LoadAssignment: &endpoint.ClusterLoadAssignment{
 				ClusterName: clusterName,
 				Endpoints:   endpoints,

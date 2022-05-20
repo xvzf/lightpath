@@ -54,7 +54,7 @@ func (so *serviceOpts) Update(svc *v1.Service) {
 	// noop
 }
 
-// serviceContainer maps a kubernetes serviceContainer loosely to an internal representation used for envoy
+// serviceContainer maps a kubernetes serviceContainer loosely to an internal representation used for envoy.
 type serviceContainer struct {
 	m   sync.Mutex // Allow update operations
 	obj *v1.Service
@@ -63,7 +63,7 @@ type serviceContainer struct {
 	endpointSlices map[string]*discoveryv1.EndpointSlice
 }
 
-// NewServiceContainer creates a new service container
+// NewServiceContainer creates a new service container.
 func NewServiceContainer(svc *v1.Service) *serviceContainer {
 	return &serviceContainer{
 		obj:            svc,                 // Pass received k8s obj
@@ -72,7 +72,7 @@ func NewServiceContainer(svc *v1.Service) *serviceContainer {
 	}
 }
 
-// DeepCopy creates a deep copy of the serviceContainer object
+// DeepCopy creates a deep copy of the serviceContainer object.
 func (s *serviceContainer) DeepCopy() *serviceContainer {
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -126,26 +126,25 @@ func (s *serviceContainer) UpdatEndpointslices(endpointslice *discoveryv1.Endpoi
 
 	// Handle update
 	return s.updateEndpointSlice(endpointslice)
-
 }
 
-// updateEndpointSlice handles insertions/updates of existing ones
-func (s *serviceContainer) updateEndpointSlice(new *discoveryv1.EndpointSlice) EndpointSliceOperationStatus {
-	existing, ok := s.endpointSlices[new.Name]
+// updateEndpointSlice handles insertions/updates of existing ones.
+func (s *serviceContainer) updateEndpointSlice(es *discoveryv1.EndpointSlice) EndpointSliceOperationStatus {
+	existing, ok := s.endpointSlices[es.Name]
 
 	// Existing and needs to be updated
-	if ok && existing.ResourceVersion >= new.ResourceVersion {
+	if ok && existing.ResourceVersion >= es.ResourceVersion {
 		return ENDPOINTSLICE_OPERATION_STATUS_NOOP
 	}
 
-	s.endpointSlices[new.Name] = new
+	s.endpointSlices[es.Name] = es
 	return ENDPOINTSLICE_OPERATION_STATUS_UPDATED
 }
 
-// deleteEndpointSlice deletes a single endpointslice
-func (s *serviceContainer) deleteEndpointSlice(remove *discoveryv1.EndpointSlice) EndpointSliceOperationStatus {
-	if _, ok := s.endpointSlices[remove.Name]; ok {
-		delete(s.endpointSlices, remove.Name)
+// deleteEndpointSlice deletes a single endpointslice.
+func (s *serviceContainer) deleteEndpointSlice(es *discoveryv1.EndpointSlice) EndpointSliceOperationStatus {
+	if _, ok := s.endpointSlices[es.Name]; ok {
+		delete(s.endpointSlices, es.Name)
 		return ENDPOINTSLICE_OPERATION_STATUS_DELETED
 	}
 
@@ -153,7 +152,7 @@ func (s *serviceContainer) deleteEndpointSlice(remove *discoveryv1.EndpointSlice
 }
 
 func (s *serviceContainer) Snapshot() *snapshot.Service {
-	klog.V(9).Info("Aquiring lock for serviceContailer")
+	klog.V(9).Info("Acquiring lock for serviceContailer")
 	s.m.Lock()
 	defer klog.V(9).Info("Releasing lock for serviceContailer")
 	defer s.m.Unlock()

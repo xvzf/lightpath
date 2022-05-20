@@ -59,5 +59,4 @@ func main() {
 	if err != nil {
 		klog.Error(err, "exited with error")
 	}
-
 }
