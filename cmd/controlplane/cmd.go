@@ -17,6 +17,8 @@ var (
 	port       uint
 	metricPort uint
 	nodeID     string
+
+	host string
 )
 
 func init() {
@@ -25,7 +27,8 @@ func init() {
 	// Metric endpoint
 	flag.UintVar(&metricPort, "metric-port", 9000, "metric endpoint")
 	// Envoy controlplane node-id
-	flag.StringVar(&nodeID, "nodeID", "node id served to envoy (pod name)", "Node ID")
+	flag.StringVar(&nodeID, "nodeID", "k8s", "Node ID (kubernetes node name)")
+	flag.StringVar(&host, "host", ":12000", "host for xDS server")
 
 	// pass logging flags from klog
 	klog.InitFlags(nil)
