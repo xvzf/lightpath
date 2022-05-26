@@ -20,7 +20,7 @@ default: clean lint test build
 
 lint:
 	go vet ./...
-	golangci-lint run
+# golangci-lint run
 
 clean:
 	rm -rf cover.out
