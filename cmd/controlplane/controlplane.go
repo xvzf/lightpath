@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/xvzf/lightpath/pkg/server"
 	"github.com/xvzf/lightpath/pkg/state"
+	"github.com/xvzf/lightpath/pkg/translations"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -17,10 +19,43 @@ import (
 )
 
 const (
-	RESYNC_INTERVAL = 4 * time.Second
+	RESYNC_INTERVAL           = 4 * time.Second
+	NEW_SNAPSHOT_WAIT_TIMEOUT = 10 * time.Second
+
+	GRPC_KEEPALIVE_TIME         = 10 * time.Second
+	GRPC_KEEPALIVE_TIMEOUT      = 5 * time.Second
+	GRPC_KEEPALIVE_MIN_TIME     = 5 * time.Second
+	GRPC_MAX_CONCURRENT_STREAMS = 1000000
 )
 
-func run(ctx context.Context) error {
+func updateSnapshot(ctx context.Context, server server.XdsServer, subscriber state.ServiceStateSubscriber) error {
+	// Update snapshots on new events
+	recvCtx, recvCtxCancel := context.WithTimeout(ctx, NEW_SNAPSHOT_WAIT_TIMEOUT)
+	defer recvCtxCancel()
+
+	if snap := subscriber.ReceiveEvent(recvCtx); snap != nil {
+		// Snapshot extraction successful, try to ingest
+		envoySnap, err := translations.EnvoySnapshotFromKubeSnapshot(snap)
+		if err != nil {
+			return err
+		}
+		err = server.UpdateSnapshot(ctx, envoySnap)
+		if err != nil {
+			return err
+		}
+		klog.InfoS("Updated envoy snapshot")
+	} else {
+		// No snapshot received, continuing
+		klog.Info("No update required to envoy snapshot")
+	}
+
+	return nil
+}
+
+func run(parentCtx context.Context) error {
+	ctx, cancelCtx := context.WithCancel(parentCtx)
+	defer cancelCtx()
+
 	// Create clients
 	client, _, err := createClients("/Users/xvzf/.kube/config") // FIXME
 	if err != nil {
@@ -29,13 +64,15 @@ func run(ctx context.Context) error {
 
 	// Create xDS server
 	xdsServer, err := server.New(server.XdsServerOpts{
-		GrpcKeepaliveTime:        10 * time.Second,
-		GrpcKeepaliveTimeout:     5 * time.Second,
-		GrpcKeepAliveMinTime:     5 * time.Second,
-		GrpcMaxConcurrentStreams: 100000,
-		Logger:                   l.WithValues("component", "xds-server"),
-		NodeID:                   nodeID,
-		Host:                     host,
+		// GRPC Server settings
+		GrpcKeepaliveTime:        GRPC_KEEPALIVE_TIME,
+		GrpcKeepaliveTimeout:     GRPC_KEEPALIVE_TIMEOUT,
+		GrpcKeepaliveMinTime:     GRPC_KEEPALIVE_MIN_TIME,
+		GrpcMaxConcurrentStreams: GRPC_MAX_CONCURRENT_STREAMS,
+
+		Logger: l.WithValues("component", "xds-server"),
+		NodeID: nodeID,
+		Host:   host,
 	})
 	if err != nil {
 		return err
@@ -75,32 +112,48 @@ func run(ctx context.Context) error {
 	serviceConfig.RegisterEventHandler(stateSubscriber)
 	endpointSliceConfig.RegisterEventHandler(stateSubscriber)
 
-	errChan := make(chan error)
+	// Waitgroup for asunc tasks
+	var wg sync.WaitGroup
 
 	// Start informer
-	informerFactory.Start(ctx.Done())
-	// Start GRPC Server
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
+		informerFactory.Start(ctx.Done())
+		<-ctx.Done()
+	}()
+
+	// Start GRPC Server
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
 		klog.Info("Starting xDS Server")
 		err := xdsServer.Start(ctx)
 		if err != nil {
 			klog.Error(err, "xDS Server failure")
+			cancelCtx()
 		}
-		errChan <- err
+		klog.Info("GRPC Server exited")
 	}()
 
-	/*
-		time.Sleep(10 * time.Second)
-
-		snap := stateSubscriber.Snapshot()
-		cache, err := translations.EnvoySnapshotFromKubeSnapshot(snap)
-		if err != nil {
-			return err
+	// Listen until we have
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-ctx.Done():
+				// Context is done -> don't enter another iteration
+				return
+			default:
+				err := updateSnapshot(ctx, xdsServer, stateSubscriber)
+				if err != nil {
+					klog.ErrorS(err, "Failed to update snapshot")
+				}
+			}
 		}
-		fmt.Printf("cache.Resources: %v\n", cache.Resources)
-		klog.Info("Finished snapshot")
-	*/
+	}()
 
-	<-errChan
+	wg.Wait()
 	return nil
 }

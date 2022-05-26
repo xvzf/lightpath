@@ -121,6 +121,12 @@ func mapKubeEndpointSlicesToMappendLocalityEndpoints(endpointSlices []*discovery
 		}
 
 		for _, endpointSlicePort := range endpointslice.Ports {
+			// skip UDP & STCP
+			if *endpointSlicePort.Protocol != v1.ProtocolTCP {
+				klog.Warning("Not implemented ", "protocol ", *endpointSlicePort.Protocol)
+				continue
+			}
+
 			idx := idxFamilyProtocolPort(v1.IPFamily(endpointslice.AddressType), *endpointSlicePort.Protocol, *endpointSlicePort.Port)
 
 			newZoneMappedEndpoints, err := mapKubeEndpointsToEnvoyEndpoints(

@@ -37,8 +37,9 @@ func EnvoySnapshotFromKubeSnapshot(snap *snapshot.Snapshot) (*cache.Snapshot, er
 
 	envoySnap, err := cache.NewSnapshot(time.Now().Format(time.RFC3339Nano),
 		map[resource.Type][]types.Resource{
-			resource.ListenerType: listeners,
-			resource.ClusterType:  clusters, // Includes endpoints due to nested datastructure
+			resource.ListenerType: listeners, // This is fine
+			resource.ClusterType:  clusters,  // Includes endpoints due to nested datastructure
+			// FIXME add resource.EndpointType
 		},
 	)
 

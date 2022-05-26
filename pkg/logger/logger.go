@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"fmt"
+
 	"github.com/go-logr/logr"
 	"k8s.io/klog/v2/klogr"
 )
@@ -53,23 +55,31 @@ func (l *logger) GetLogger() logr.Logger {
 	return l.logr
 }
 
+func sanitize(in []interface{}) []interface{} {
+	out := make([]interface{}, 0, len(in))
+	for _, v := range in {
+		out = append(out, fmt.Sprintf("%v", v))
+	}
+	return out
+}
+
 // Verbosity levels following https://kubernetes.io/docs/concepts/cluster-administration/system-logs/
 func (l *logger) Debugf(format string, args ...interface{}) {
-	l.logr.V(4).Info(format, args...)
+	l.logr.V(4).Info(format, sanitize(args)...)
 }
 
 func (l *logger) Infof(format string, args ...interface{}) {
-	l.logr.V(2).Info(format, args...)
+	l.logr.V(2).Info(format, sanitize(args)...)
 }
 
 func (l *logger) Warnf(format string, args ...interface{}) {
-	l.logr.V(1).Info(format, args...)
+	l.logr.V(1).Info(format, sanitize(args))
 }
 
 func (l *logger) Errorf(format string, args ...interface{}) {
-	l.logr.V(0).Info(format, args...)
+	l.logr.V(0).Info(format, sanitize(args)...)
 }
 
 func (l *logger) Error(err error, format string, args ...interface{}) {
-	l.logr.V(0).Error(err, format, args...)
+	l.logr.V(0).Error(err, format, sanitize(args)...)
 }

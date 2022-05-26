@@ -11,7 +11,7 @@ import (
 
 // create a unique index based on IPFamily, protocol & port.
 func idxFamilyProtocolPort(ipFamily v1.IPFamily, protocol v1.Protocol, port int32) string {
-	return fmt.Sprintf("%s-%s-%d", ipFamily, protocol, port)
+	return fmt.Sprintf("%s:%s:%d", ipFamily, protocol, port)
 }
 
 func mapKubeProtocolToEnvoyProtocol(protocol v1.Protocol) core.SocketAddress_Protocol {

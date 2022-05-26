@@ -22,7 +22,7 @@ import (
 type XdsServerOpts struct {
 	GrpcKeepaliveTime        time.Duration
 	GrpcKeepaliveTimeout     time.Duration
-	GrpcKeepAliveMinTime     time.Duration
+	GrpcKeepaliveMinTime     time.Duration
 	GrpcMaxConcurrentStreams uint32
 
 	Logger logger.Logger
@@ -46,7 +46,7 @@ type xdsServer struct {
 }
 
 // New creates a new XDS Server.
-func New(opts XdsServerOpts) (XdsServer, error) {
+func New(opts XdsServerOpts) (*xdsServer, error) {
 	listen, err := net.Listen("tcp", opts.Host)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func New(opts XdsServerOpts) (XdsServer, error) {
 				Timeout: opts.GrpcKeepaliveTimeout,
 			}),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-				MinTime:             opts.GrpcKeepAliveMinTime,
+				MinTime:             opts.GrpcKeepaliveMinTime,
 				PermitWithoutStream: true,
 			}),
 		),

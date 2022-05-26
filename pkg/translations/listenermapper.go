@@ -45,6 +45,9 @@ func getTCPListener(svcObj *v1.Service, servicePort v1.ServicePort) []*listener.
 					SocketAddress: &core.SocketAddress{
 						Protocol: mapKubeProtocolToEnvoyProtocol(servicePort.Protocol),
 						Address:  clusterIP,
+						PortSpecifier: &core.SocketAddress_PortValue{
+							PortValue: uint32(servicePort.Port),
+						},
 					},
 				},
 			},

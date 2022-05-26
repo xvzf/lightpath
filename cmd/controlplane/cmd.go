@@ -28,7 +28,7 @@ func init() {
 	flag.UintVar(&metricPort, "metric-port", 9000, "metric endpoint")
 	// Envoy controlplane node-id
 	flag.StringVar(&nodeID, "nodeID", "k8s", "Node ID (kubernetes node name)")
-	flag.StringVar(&host, "host", ":12000", "host for xDS server")
+	flag.StringVar(&host, "host", "127.0.0.1:18000", "host for xDS server")
 
 	// pass logging flags from klog
 	klog.InitFlags(nil)

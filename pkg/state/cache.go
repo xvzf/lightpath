@@ -105,15 +105,14 @@ func (c *clusterServiceStateCache) UpdatEndpointSlice(endpointslice *discoveryv1
 	}
 	c.m.Lock()
 	svc, ok := c.services[svcName]
-	c.m.Unlock()
+	defer c.m.Unlock()
 
 	if ok {
 		res := svc.UpdatEndpointslices(endpointslice, delete)
-		if res > ENDPOINTSLICE_OPERATION_STATUS_DELETED {
+		if res >= ENDPOINTSLICE_OPERATION_STATUS_DELETED {
 			c.log.V(1).Info(res.String(), "name", endpointslice.Name)
-			return false
-		} else if res > ENDPOINTSLICE_OPERATION_STATUS_NOOP {
-			c.log.V(2).Info(res.String(), "name", endpointslice.Name)
+		} else if res == ENDPOINTSLICE_OPERATION_STATUS_NOOP {
+			c.log.V(4).Info(res.String(), "name", endpointslice.Name)
 			return false
 		}
 	} else {
