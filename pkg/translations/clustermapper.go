@@ -39,5 +39,6 @@ func getClustersFromServiceSnapshot(svcSnap *snapshot.Service) ([]*cluster.Clust
 		})
 	}
 
-	return res, nil
+	// return res, nil
+	return []*cluster.Cluster{}, nil
 }

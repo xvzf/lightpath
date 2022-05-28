@@ -121,17 +121,31 @@ func mapKubeEndpointSlicesToMappendLocalityEndpoints(endpointSlices []*discovery
 		}
 
 		for _, endpointSlicePort := range endpointslice.Ports {
-			// skip UDP & STCP
-			if *endpointSlicePort.Protocol != v1.ProtocolTCP {
-				klog.Warning("Not implemented ", "protocol ", *endpointSlicePort.Protocol)
+			if endpointSlicePort.Protocol == nil {
+				klog.Warning("Protoocl not set")
 				continue
 			}
 
-			idx := idxFamilyProtocolPort(v1.IPFamily(endpointslice.AddressType), *endpointSlicePort.Protocol, *endpointSlicePort.Port)
+			protocol := (v1.Protocol)(pointer.StringDeref((*string)(endpointSlicePort.Protocol), "none"))
+			port := pointer.Int32Deref(endpointSlicePort.Port, -1)
+
+			// Check if port is valid
+			if !(port > 0) {
+				klog.Warning("Invalid port", "port ", port)
+				continue
+			}
+
+			// skip STCP as it's not supported by Envoy
+			if protocol != v1.ProtocolTCP && protocol != v1.ProtocolUDP {
+				klog.Warning("Not implemented ", "protocol ", protocol)
+				continue
+			}
+
+			idx := idxFamilyProtocolPort(v1.IPFamily(endpointslice.AddressType), protocol, port)
 
 			newZoneMappedEndpoints, err := mapKubeEndpointsToEnvoyEndpoints(
-				v1.Protocol(pointer.StringDeref((*string)(endpointSlicePort.Protocol), string(v1.ProtocolTCP))),
-				pointer.Int32Deref(endpointSlicePort.Port, 0),
+				protocol,
+				port,
 				&endpointslice.Endpoints,
 			)
 			if err != nil {
