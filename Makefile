@@ -36,7 +36,7 @@ build: clean dist
 	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -v \
 		-ldflags '-X "${GIT_REPO}/internal/version.commit=${SHA}" -X "${GIT_REPO}/internal/version.date=${BUILD_DATE}" -X "${GIT_REPO}/internal/version.tag=${TAG_NAME}"' \
 		-o "./dist/${GOOS}/${GOARCH}/${BIN_NAME}" ${MAIN_DIRECTORY}
-		
+
 build-linux-arm64: export GOOS := linux
 build-linux-arm64: export GOARCH := arm64
 build-linux-arm64:
@@ -50,13 +50,13 @@ build-linux-amd64:
 container-image-%: build-linux-amd64 build-linux-arm64
 	docker buildx build $(DOCKER_BUILDX_ARGS) --progress=chain -t $(IMAGE_REPO):$* --platform=$(DOCKER_BUILD_PLATFORMS) -f buildx.Dockerfile .
 
-.PHONY: kind-up
+.PHONY: k8s-up
 k8s-up:
 	kind create cluster --config ./hack/ci/kind-cluster.yaml --wait 120s --name=lightpath-ci
 
-.PHONY: kind-down
+.PHONY: k8s-down
 k8s-down:
 	kind delete cluster --name=lightpath-ci
 
-run: default kind-up
+run: default k8s-up
 	./dist/$(GOOS)/$(GOARCH)/$(BIN_NAME) -v=3
