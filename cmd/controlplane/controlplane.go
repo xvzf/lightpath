@@ -57,7 +57,7 @@ func run(parentCtx context.Context) error {
 	defer cancelCtx()
 
 	// Create clients
-	client, _, err := createClients("/Users/xvzf/.kube/config") // FIXME
+	client, _, err := createClients(kubeconfig)
 	if err != nil {
 		return err
 	}
