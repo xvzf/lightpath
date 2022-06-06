@@ -1,5 +1,4 @@
 .PHONY: clean lint test build k8s-up k8s-down
-
 BIN_NAME := controlplane
 MAIN_DIRECTORY := ./cmd/controlplane
 
@@ -60,3 +59,6 @@ k8s-down:
 
 run: default k8s-up
 	./dist/$(GOOS)/$(GOARCH)/$(BIN_NAME) -v=3
+
+sync-remote:
+	rsync -chavzP --stats $(shell pwd) 89.58.46.82:/home/${USER} --exclude .vscode/ --exclude dist/
