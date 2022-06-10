@@ -53,7 +53,6 @@ container-image-%: build-linux-amd64 build-linux-arm64
 k8s-up:
 	kind create cluster --config ./hack/ci/kind-cluster.yaml --wait 120s --name=lightpath-ci
 	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml
-	kubectl apply -f ./hack/ci/test-deploy.yaml
 
 .PHONY: k8s-down
 k8s-down:
