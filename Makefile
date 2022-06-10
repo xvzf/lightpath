@@ -52,6 +52,7 @@ container-image-%: build-linux-amd64 build-linux-arm64
 .PHONY: k8s-up
 k8s-up:
 	kind create cluster --config ./hack/ci/kind-cluster.yaml --wait 120s --name=lightpath-ci
+	kubectl apply -f ./hack/ci/test-deploy.yaml
 
 .PHONY: k8s-down
 k8s-down:
