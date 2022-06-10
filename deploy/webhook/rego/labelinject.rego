@@ -1,15 +1,13 @@
 package lightpath.webhook
 
-default uid = ""
-
-uid = input.request.uid
+req_uid := input.request.uid
 
 mutate = {
 	"apiVersion": "admission.k8s.io/v1",
 	"kind": "AdmissionReview",
 	"response": {
 		"allowed": count(deny) == 0,
-		"uid": uid,
+		"uid": req_uid,
 		"patchType": "JSONPatch",
 		"status": {"message": concat(", ", deny)},
 		# Patch label
@@ -17,12 +15,22 @@ mutate = {
 	},
 }
 
+# Exclude well-known namespaces required for bootstrapping
+well_known_exclusions = [
+	"lightpath-system",
+	"kube-system",
+	"cert-manager",
+]
+
 patch[p] {
 	# Only trigger on create or update
 	input.request.operation == "CREATE"
 
 	# Only applies when the label does not exist
 	not input.request.object.metadata.labels["service.kubernetes.io/service-proxy-name"]
+
+	# Exclude well-known namespaces we are relying on
+	not input.object.metadata.namespace[well_known_exclusions]
 
 	p := {
 		"op": "add",

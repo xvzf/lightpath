@@ -61,7 +61,7 @@ spec:
       name: webhook-server
     spec:
       containers:
-        - image: openpolicyagent/opa:0.42.0-static
+        - image: openpolicyagent/opa:0.41.0-static
           name: opa
           ports:
             - name: https
@@ -97,6 +97,7 @@ spec:
           readinessProbe:
             httpGet:
               port: https
+              scheme: HTTPS
               path: /health
           securityContext:
             readOnlyRootFilesystem: true

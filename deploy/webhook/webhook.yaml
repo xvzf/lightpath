@@ -14,10 +14,15 @@ webhooks:
         namespace: lightpath-system
         path: "/v0/data/lightpath/webhook/mutate"
         port: 443
+    namespaceSelector:
+      matchExpressions:
+      - key: lightpath
+        operator: NotIn
+        values: ["disabled"]
+    failurePolicy: Fail
     rules:
       - operations: ["CREATE"]
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["services"]
-    failurePolicy: Fail
     sideEffects: None

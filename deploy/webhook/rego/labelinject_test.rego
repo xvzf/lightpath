@@ -1,7 +1,7 @@
 package lightpath.webhook
 
 test_create_patch_service_with_label {
-	resp := main with input as {
+	resp := mutate with input as {
 		"kind": "AdmissionReview",
 		"request": {
 			"operation": "CREATE",
@@ -21,7 +21,7 @@ test_create_patch_service_with_label {
 }
 
 test_create_patch_service_without_label {
-	resp := main with input as {
+	resp := mutate with input as {
 		"kind": "AdmissionReview",
 		"request": {
 			"operation": "CREATE",
@@ -44,7 +44,7 @@ test_create_patch_service_without_label {
 }
 
 test_create_patch_invalid_kind {
-	resp := main with input as {
+	resp := mutate with input as {
 		"kind": "AdmissionReview",
 		"request": {
 			"operation": "CREATE",
@@ -63,7 +63,7 @@ test_create_patch_invalid_kind {
 }
 
 test_create_patch_invalid_version {
-	resp := main with input as {
+	resp := mutate with input as {
 		"kind": "AdmissionReview",
 		"request": {
 			"operation": "CREATE",
@@ -79,4 +79,26 @@ test_create_patch_invalid_version {
 	payload := resp.response
 	not payload.allowed
 	contains(payload.status.message, "requiring v1")
+}
+
+test_create_patch_well_known_excluded_namespace {
+	resp := mutate with input as {
+		"kind": "AdmissionReview",
+		"request": {
+			"operation": "CREATE",
+			"kind": {
+				"kind": "Service",
+				"version": "v1",
+			},
+			"object": {"metadata": {
+				"namespace": "kube-system",
+				"labels": {"service.kubernetes.io/service-proxy-name": "kube-proxy"},
+			}},
+		},
+	}
+
+	resp
+	payload := resp.response
+	payload.allowed
+	count(patch) == 0
 }
