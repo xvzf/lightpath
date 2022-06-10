@@ -1,0 +1,23 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: lightpath-service-label-webhook
+  annotations:
+    cert-manager.io/inject-ca-from: lightpath-system/webhook-server
+webhooks:
+  - name: service.labelinjection.lightpath
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: webhook-server
+        namespace: lightpath-system
+        path: "/v0/data/lightpath/webhook/mutate"
+        port: 443
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["services"]
+    failurePolicy: Fail
+    sideEffects: None

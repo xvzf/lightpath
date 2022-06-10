@@ -1,10 +1,10 @@
-package webhook
+package lightpath.webhook
 
 default uid = ""
 
 uid = input.request.uid
 
-main = {
+mutate = {
 	"apiVersion": "admission.k8s.io/v1",
 	"kind": "AdmissionReview",
 	"response": {

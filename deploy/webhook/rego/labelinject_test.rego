@@ -1,4 +1,4 @@
-package webhook
+package lightpath.webhook
 
 test_create_patch_service_with_label {
 	resp := main with input as {

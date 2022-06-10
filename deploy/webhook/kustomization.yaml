@@ -1,0 +1,13 @@
+namespace: lightpath-system
+
+commonLabels:
+  app.kubernetes.io/component: webhook
+
+resources:
+  - opa.yaml
+  - webhook.yaml
+
+configMapGenerator:
+  - name: policies
+    files:
+      - rego/labelinject.rego

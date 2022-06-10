@@ -1,0 +1,110 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: opa-selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: webhook-server
+spec:
+  secretName: webhook-server-tls
+  dnsNames:
+    - webhook-server
+  issuerRef:
+    name: opa-selfsigned
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name:
+    webhook-server
+spec:
+  selector:
+    app.kubernetes.io/name: webhook-server
+  ports:
+    - name: https
+      port: 443
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: webhook-server
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webhook-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: webhook-server
+  name: webhook-server
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+    type: RollingUpdate
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webhook-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: webhook-server
+      name: webhook-server
+    spec:
+      containers:
+        - image: openpolicyagent/opa:0.42.0-static
+          name: opa
+          ports:
+            - name: https
+              containerPort: 8443
+          args:
+            - "run"
+            - "--server"
+            - "--tls-cert-file=/certs/tls.crt"
+            - "--tls-private-key-file=/certs/tls.key"
+            - "--addr=0.0.0.0:8443"
+            - "--log-level=debug"
+            - "--log-format=json"
+            - "--format=pretty"
+            - "-w"
+            - "/policies"
+          volumeMounts:
+            - readOnly: true
+              mountPath: /certs
+              name: server-cert
+            - readOnly: true
+              mountPath: /policies
+              name: policies
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 50m
+            limits:
+              memory: 96Mi
+              cpu: 100m
+          livenessProbe:
+            tcpSocket:
+              port: https
+          readinessProbe:
+            httpGet:
+              port: https
+              path: /health
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsUser: 1000
+      volumes:
+        - name: policies
+          configMap:
+            name: policies
+        - name: server-cert
+          secret:
+            secretName: webhook-server-tls
