@@ -25,6 +25,7 @@ clean:
 	rm -rf cover.out
 
 test: clean
+	opa test -v  $(shell find . -name "*.rego")
 	go test -v -race -cover ./...
 
 dist:
