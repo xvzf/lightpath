@@ -11,7 +11,7 @@ mutate = {
 		"patchType": "JSONPatch",
 		"status": {"message": concat(", ", deny)},
 		# Patch label
-		"patch": base64url.encode(json.marshal(patch)),
+		"patch": base64.encode(json.marshal(patch)),
 	},
 }
 
@@ -22,7 +22,7 @@ well_known_exclusions = [
 	"cert-manager",
 ]
 
-patch[p] {
+patch_conditions {
 	# Only trigger on create or update
 	input.request.operation == "CREATE"
 
@@ -31,12 +31,30 @@ patch[p] {
 
 	# Exclude well-known namespaces we are relying on
 	not input.object.metadata.namespace[well_known_exclusions]
+}
+
+patch[p] {
+	# metadata.labels exists -> we have to patch it
+	input.request.object.metadata.labels
+	patch_conditions
 
 	p := {
 		"op": "add",
 		# Well-known label as defined here: https://kubernetes.io/docs/reference/labels-annotations-taints/#servicekubernetesioservice-proxy-name
-		"path": "/metadata/annotations/foo/service.kubernetes.io\\/service-proxy-name",
+		"path": "/metadata/labels/service.kubernetes.io~1service-proxy-name",
 		"value": "lightpath",
+	}
+}
+
+patch[p] {
+	# metadata.labels doesn't exist yet -> we have to create it
+	not input.request.object.metadata.labels
+	patch_conditions
+	p := {
+		"op": "add",
+		# Well-known label as defined here: https://kubernetes.io/docs/reference/labels-annotations-taints/#servicekubernetesioservice-proxy-name
+		"path": "/metadata/labels",
+		"value": {"service.kubernetes.io/service-proxy-name": "lightpath"},
 	}
 }
 

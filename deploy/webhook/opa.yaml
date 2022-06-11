@@ -14,6 +14,9 @@ spec:
   secretName: webhook-server-tls
   dnsNames:
     - webhook-server
+    - webhook-server.lightpath-system.svc
+    - webhook-server.lightpath-system.svc.cluster
+    - webhook-server.lightpath-system.svc.cluster.local
   issuerRef:
     name: opa-selfsigned
 ---
@@ -28,6 +31,7 @@ spec:
   ports:
     - name: https
       port: 443
+      targetPort: 8443
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -72,10 +76,11 @@ spec:
             - "--tls-cert-file=/certs/tls.crt"
             - "--tls-private-key-file=/certs/tls.key"
             - "--addr=0.0.0.0:8443"
-            - "--log-level=debug"
+            - "--set=status.console=true"
+            - "--set=decision_logs.console=true"
             - "--log-format=json"
             - "--format=pretty"
-            - "-w"
+            - "--watch"
             - "/policies"
           volumeMounts:
             - readOnly: true
@@ -92,13 +97,15 @@ spec:
               memory: 96Mi
               cpu: 100m
           livenessProbe:
-            tcpSocket:
-              port: https
-          readinessProbe:
             httpGet:
               port: https
               scheme: HTTPS
               path: /health
+          readinessProbe:
+            httpGet:
+              port: https
+              scheme: HTTPS
+              path: /health?plugins&bundle
           securityContext:
             readOnlyRootFilesystem: true
             runAsUser: 1000

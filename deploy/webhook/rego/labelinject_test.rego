@@ -1,6 +1,8 @@
 package lightpath.webhook
 
-test_create_patch_service_with_label {
+default req_uid := ""
+
+test_create_patch_service_with_existing_label {
 	resp := mutate with input as {
 		"kind": "AdmissionReview",
 		"request": {
@@ -17,10 +19,10 @@ test_create_patch_service_with_label {
 	payload := resp.response
 	payload.patchType == "JSONPatch"
 	patch := json.unmarshal(base64url.decode(payload.patch))
-	patch == []
+	count(patch) == 0
 }
 
-test_create_patch_service_without_label {
+test_create_patch_service_without_label_field {
 	resp := mutate with input as {
 		"kind": "AdmissionReview",
 		"request": {
@@ -37,9 +39,32 @@ test_create_patch_service_without_label {
 	payload = resp.response
 	payload.allowed
 	payload.patchType == "JSONPatch"
-	patches = json.unmarshal(base64url.decode(payload.patch))
+	patches = json.unmarshal(base64.decode(payload.patch))
 	patches[0].op == "add"
-	patches[0].path == "/metadata/annotations/foo/service.kubernetes.io\\/service-proxy-name"
+	patches[0].path == "/metadata/labels"
+	patches[0].value == {"service.kubernetes.io/service-proxy-name": "lightpath"}
+}
+
+test_create_patch_service_with_label_field {
+	resp := mutate with input as {
+		"kind": "AdmissionReview",
+		"request": {
+			"operation": "CREATE",
+			"kind": {
+				"kind": "Service",
+				"version": "v1",
+			},
+			"object": {"metadata": {"labels": {"test": "test"}}},
+		},
+	}
+
+	resp
+	payload = resp.response
+	payload.allowed
+	payload.patchType == "JSONPatch"
+	patches = json.unmarshal(base64.decode(payload.patch))
+	patches[0].op == "add"
+	patches[0].path == "/metadata/labels/service.kubernetes.io~1service-proxy-name"
 	patches[0].value == "lightpath"
 }
 
