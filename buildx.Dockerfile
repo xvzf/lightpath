@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
-FROM alpine
+FROM gcr.io/distroless/static
 
 RUN apk --no-cache --no-progress add ca-certificates tzdata \
     && rm -rf /var/cache/apk/*
