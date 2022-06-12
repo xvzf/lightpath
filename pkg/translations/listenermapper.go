@@ -156,9 +156,10 @@ func getListenerFromServiceSnapshpt(svcSnap *snapshot.Service) []*listener.Liste
 		// multi-IPFamily support is based on e.g. ClusterIP/NodePort
 		switch servicePort.Protocol {
 		case v1.ProtocolTCP:
-			// listeners = append(listeners, getTCPListener(svcSnap.Obj, servicePort)...)
-		case v1.ProtocolUDP:
-			listeners = append(listeners, getUDPListener(svcSnap.Obj, servicePort)...)
+			listeners = append(listeners, getTCPListener(svcSnap.Obj, servicePort)...)
+		// FIXME support UDP services
+		// case v1.ProtocolUDP:
+		// 	listeners = append(listeners, getUDPListener(svcSnap.Obj, servicePort)...)
 		default:
 			klog.Warning("Not implemented", "protocol", servicePort.Protocol)
 		}

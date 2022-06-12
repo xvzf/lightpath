@@ -7,7 +7,8 @@ import (
 
 	"github.com/xvzf/lightpath/pkg/server"
 	"github.com/xvzf/lightpath/pkg/state"
-	"github.com/xvzf/lightpath/pkg/translations"
+	"github.com/xvzf/lightpath/pkg/translations2"
+	"github.com/xvzf/lightpath/pkg/wellknown"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -34,8 +35,10 @@ func updateSnapshot(ctx context.Context, server server.XdsServer, subscriber sta
 	defer recvCtxCancel()
 
 	if snap := subscriber.ReceiveEvent(recvCtx); snap != nil {
+		mapper := translations2.KubeMapper{}
 		// Snapshot extraction successful, try to ingest
-		envoySnap, err := translations.EnvoySnapshotFromKubeSnapshot(snap)
+		// envoySnap, err := translations.EnvoySnapshotFromKubeSnapshot(snap)
+		envoySnap, err := mapper.EnvoySnapshotFromKubeSnapshot(snap)
 		if err != nil {
 			return err
 		}
@@ -78,19 +81,19 @@ func run(parentCtx context.Context) error {
 		return err
 	}
 
-	// We're not interested in explicitly ignored services
-	noProxyName, err := labels.NewRequirement(proxyapis.LabelServiceProxyName, selection.DoesNotExist, nil)
+	// We're implementing an alternative proxy for lightpath -> let's
+	lightPathProxy, err := labels.NewRequirement(proxyapis.LabelServiceProxyName, selection.Equals, []string{wellknown.LightpathProxyName})
 	if err != nil {
 		return err
 	}
-	// We're also not interested in headless services (so far, might be interesting in the future)
+	// We're also not interested in headless services
 	noHeadlessEndpoints, err := labels.NewRequirement(v1.IsHeadlessService, selection.DoesNotExist, nil)
 	if err != nil {
 		return err
 	}
 
 	labelSelector := labels.NewSelector()
-	labelSelector = labelSelector.Add(*noProxyName, *noHeadlessEndpoints)
+	labelSelector = labelSelector.Add(*lightPathProxy, *noHeadlessEndpoints)
 
 	// pass labelselector options to informer factory
 	informerFactory := informers.NewSharedInformerFactoryWithOptions(
