@@ -1,12 +1,14 @@
 package translations2
 
 import (
+	"fmt"
 	"time"
 
 	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
-	tcp_proxyv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/tcp_proxy/v3"
+	tcp_proxy "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/tcp_proxy/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
@@ -18,6 +20,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/pointer"
 )
 
 const (
@@ -32,7 +35,7 @@ func (km *KubeMapper) EnvoySnapshotFromKubeSnapshot(snap *snapshot.Snapshot) (*c
 
 	clusters := []types.Resource{}
 	listeners := []types.Resource{}
-	// endpoints := []types.Resource{}
+	endpoints := []types.Resource{}
 
 	for _, svc := range snap.Services {
 		for _, port := range svc.Obj.Spec.Ports {
@@ -43,14 +46,16 @@ func (km *KubeMapper) EnvoySnapshotFromKubeSnapshot(snap *snapshot.Snapshot) (*c
 			clusters = append(clusters, km.MapServicePortToClusters(svc.Obj, &port)...)
 			listeners = append(listeners, km.MapServicePortToListeners(svc.Obj, &port)...)
 		}
-
+		// Map endpounts
+		// endpoints = append(endpoints, km.MapEndpointSliceToLocalityEndpoints(svc.Obj, svc.EndpointSlices)...)
+		endpoints = append(endpoints, km.MapEndpointSliceToLocalityEndpoints(svc.Obj, svc.EndpointSlices)...)
 	}
 
 	envoySnap, err := cache.NewSnapshot(time.Now().Format(time.RFC3339Nano),
 		map[resource.Type][]types.Resource{
 			resource.ListenerType: listeners,
 			resource.ClusterType:  clusters,
-			// FIXME add resource.EndpointType
+			resource.EndpointType: endpoints,
 		},
 	)
 
@@ -79,9 +84,9 @@ func (km *KubeMapper) MapServicePortToClusters(svc *v1.Service, port *v1.Service
 // genTCPListener creates a new listener with a name, ip address, port and targetCluster.
 func (km *KubeMapper) genTCPListener(listenerName, ip string, port int32, bind bool, targetClusterName string) *listener.Listener {
 
-	tcpProxy, err := anypb.New(&tcp_proxyv3.TcpProxy{
+	tcpProxy, err := anypb.New(&tcp_proxy.TcpProxy{
 		StatPrefix: "source_tcp",
-		ClusterSpecifier: &tcp_proxyv3.TcpProxy_Cluster{
+		ClusterSpecifier: &tcp_proxy.TcpProxy_Cluster{
 			Cluster: targetClusterName,
 		},
 	})
@@ -146,6 +151,129 @@ func (km *KubeMapper) MapServicePortToListeners(svc *v1.Service, port *v1.Servic
 	return buf
 }
 
-func (km *KubeMapper) MapEndpointSliceToLocalityEndpoints(svc *v1.Service, endpointslice *discoveryv1.EndpointSlice) {
+type locality struct {
+	Zone    string
+	SubZone string
+}
 
+type endpointMeta struct {
+	ipFamily v1.IPFamily
+	ip       string
+	port     int32
+
+	locality locality
+}
+
+type endpointState struct {
+	ready       bool
+	serving     bool
+	terminating bool
+}
+
+func (km *KubeMapper) extractEndpointMetaAndState(endpointslices []*discoveryv1.EndpointSlice) map[endpointMeta]endpointState {
+
+	res := make(map[endpointMeta]endpointState)
+
+	// extract unique {ip, port, zone, node} tuples
+	for _, endpointslice := range endpointslices {
+		ipFamily := v1.IPv4Protocol
+		if endpointslice.AddressType == discoveryv1.AddressTypeIPv6 {
+			ipFamily = v1.IPv6Protocol
+		}
+
+		for _, port := range endpointslice.Ports {
+			for _, endpoint := range endpointslice.Endpoints {
+				res[endpointMeta{
+					ipFamily: ipFamily,
+					ip:       endpoint.Addresses[0],
+					port:     pointer.Int32Deref(port.Port, 0),
+					locality: locality{
+						Zone:    pointer.StringDeref(endpoint.Zone, "None"),
+						SubZone: pointer.StringDeref(endpoint.NodeName, "None"),
+					},
+				}] = endpointState{
+					ready:       pointer.BoolDeref(endpoint.Conditions.Ready, true),
+					serving:     pointer.BoolDeref(endpoint.Conditions.Serving, true),
+					terminating: pointer.BoolDeref(endpoint.Conditions.Terminating, false),
+				}
+			}
+		}
+	}
+
+	return res
+}
+
+func (km *KubeMapper) mapEndpointMetaAndStateToEndpoint(meta endpointMeta, state endpointState) *endpoint.LbEndpoint {
+
+	var healthStatus core.HealthStatus
+	if state.terminating {
+		healthStatus = core.HealthStatus_DRAINING
+	} else {
+		healthStatus = core.HealthStatus_HEALTHY
+	}
+
+	return &endpoint.LbEndpoint{
+		HealthStatus: healthStatus,
+		HostIdentifier: &endpoint.LbEndpoint_Endpoint{
+			Endpoint: &endpoint.Endpoint{
+				Hostname: fmt.Sprintf("%s-%d", meta.ip, meta.port),
+				Address: &core.Address{
+					Address: &core.Address_SocketAddress{
+						SocketAddress: &core.SocketAddress{
+							Protocol: core.SocketAddress_TCP,
+							Address:  meta.ip,
+							PortSpecifier: &core.SocketAddress_PortValue{
+								PortValue: uint32(meta.port),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// MapEndpointSliceToLocalityEndpoints maps endpointslices to a cluster load assignment.
+func (km *KubeMapper) MapEndpointSliceToLocalityEndpoints(svc *v1.Service, endpointslices []*discoveryv1.EndpointSlice) []*endpoint.ClusterLoadAssignment {
+	loadAssignmentsMap := make(map[string]*endpoint.ClusterLoadAssignment)
+
+	endpoints := make(map[string]map[locality][]*endpoint.LbEndpoint)
+
+	for meta, state := range km.extractEndpointMetaAndState(endpointslices) {
+		clusterName := getClusterName(svc.Namespace, svc.Name, string(meta.ipFamily), meta.port)
+
+		// create cluster if not existing
+		if _, ok := loadAssignmentsMap[clusterName]; !ok {
+			loadAssignmentsMap[clusterName] = &endpoint.ClusterLoadAssignment{
+				ClusterName: clusterName,
+				Endpoints:   []*endpoint.LocalityLbEndpoints{},
+			}
+		}
+
+		// map endpoints
+		if _, ok := endpoints[clusterName][meta.locality]; !ok {
+			endpoints[clusterName][meta.locality] = make([]*endpoint.LbEndpoint, 0)
+		}
+		endpoints[clusterName][meta.locality] = append(endpoints[clusterName][meta.locality], km.mapEndpointMetaAndStateToEndpoint(meta, state))
+	}
+
+	// Assign endpoints to loadAssignments
+	for clusterName, loadAssignment := range loadAssignmentsMap {
+		for locality, endpoints := range endpoints[clusterName] {
+			loadAssignment.Endpoints = append(loadAssignment.Endpoints, &endpoint.LocalityLbEndpoints{
+				Locality: &core.Locality{
+					Zone:    locality.Zone,
+					SubZone: locality.SubZone,
+				},
+				LbEndpoints: endpoints,
+			})
+		}
+	}
+
+	loadAssignments := make([]*endpoint.ClusterLoadAssignment, 0, len(loadAssignmentsMap))
+	for _, value := range loadAssignmentsMap {
+		loadAssignments = append(loadAssignments, value)
+	}
+
+	return loadAssignments
 }
