@@ -73,7 +73,13 @@ func (km *KubeMapper) MapServicePortToClusters(svc *v1.Service, port *v1.Service
 			Name:                 clusterName,
 			ConnectTimeout:       durationpb.New(DEFAULT_CONNECT_TIMEOUT), // FIXME make configurable with annotation
 			ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS},
-			LbPolicy:             cluster.Cluster_ROUND_ROBIN, // FIXME make configurable
+			EdsClusterConfig: &cluster.Cluster_EdsClusterConfig{
+				EdsConfig: &core.ConfigSource{
+					ResourceApiVersion:    core.ApiVersion_V3,
+					ConfigSourceSpecifier: &core.ConfigSource_Ads{},
+				},
+			},
+			LbPolicy: cluster.Cluster_ROUND_ROBIN, // FIXME make configurable
 		})
 	}
 

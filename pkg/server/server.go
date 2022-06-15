@@ -2,9 +2,7 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"net"
-	"os"
 	"time"
 
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
@@ -77,11 +75,9 @@ func New(opts XdsServerOpts) (*xdsServer, error) {
 
 func (s *xdsServer) UpdateSnapshot(ctx context.Context, snapshot *cache.Snapshot) error {
 	if err := snapshot.Consistent(); err != nil {
-		klog.ErrorS(err, "Inconsistent snapshot, skipping serving")
-		return err
+		klog.Warning("Snapshot is inconsistent: ", err)
 	}
 	klog.Info("Updating xDS snapshot")
-	json.NewEncoder(os.Stdout).Encode(snapshot)
 	return s.cache.SetSnapshot(ctx, s.nodeID, snapshot)
 }
 
