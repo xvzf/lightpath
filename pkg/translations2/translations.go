@@ -47,7 +47,6 @@ func (km *KubeMapper) EnvoySnapshotFromKubeSnapshot(snap *snapshot.Snapshot) (*c
 			listeners = append(listeners, km.MapServicePortToListeners(svc.Obj, &port)...)
 		}
 		// Map endpounts
-		// endpoints = append(endpoints, km.MapEndpointSliceToLocalityEndpoints(svc.Obj, svc.EndpointSlices)...)
 		endpoints = append(endpoints, km.MapEndpointSliceToLocalityEndpoints(svc.Obj, svc.EndpointSlices)...)
 	}
 
@@ -234,7 +233,7 @@ func (km *KubeMapper) mapEndpointMetaAndStateToEndpoint(meta endpointMeta, state
 }
 
 // MapEndpointSliceToLocalityEndpoints maps endpointslices to a cluster load assignment.
-func (km *KubeMapper) MapEndpointSliceToLocalityEndpoints(svc *v1.Service, endpointslices []*discoveryv1.EndpointSlice) []*endpoint.ClusterLoadAssignment {
+func (km *KubeMapper) MapEndpointSliceToLocalityEndpoints(svc *v1.Service, endpointslices []*discoveryv1.EndpointSlice) []types.Resource {
 	loadAssignmentsMap := make(map[string]*endpoint.ClusterLoadAssignment)
 
 	endpoints := make(map[string]map[locality][]*endpoint.LbEndpoint)
@@ -252,6 +251,7 @@ func (km *KubeMapper) MapEndpointSliceToLocalityEndpoints(svc *v1.Service, endpo
 
 		// map endpoints
 		if _, ok := endpoints[clusterName][meta.locality]; !ok {
+			endpoints[clusterName] = make(map[locality][]*endpoint.LbEndpoint)
 			endpoints[clusterName][meta.locality] = make([]*endpoint.LbEndpoint, 0)
 		}
 		endpoints[clusterName][meta.locality] = append(endpoints[clusterName][meta.locality], km.mapEndpointMetaAndStateToEndpoint(meta, state))
@@ -275,5 +275,11 @@ func (km *KubeMapper) MapEndpointSliceToLocalityEndpoints(svc *v1.Service, endpo
 		loadAssignments = append(loadAssignments, value)
 	}
 
-	return loadAssignments
+	// Map to proper type
+	resources := make([]types.Resource, len(loadAssignments))
+	for idx := range loadAssignments {
+		resources[idx] = loadAssignments[idx]
+	}
+
+	return resources
 }
