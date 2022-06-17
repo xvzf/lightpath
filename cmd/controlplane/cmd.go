@@ -27,7 +27,7 @@ func init() {
 	// Envoy controlplane node-id
 	flag.StringVar(&nodeID, "nodeID", "k8s", "Node ID (kubernetes node name)")
 	flag.StringVar(&host, "host", "127.0.0.1:18000", "host for xDS server")
-	flag.StringVar(&kubeconfig, "kubeconfig", "/kubeconfig", "Kubeconfig")
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "Kubeconfig")
 
 	// pass logging flags from klog
 	klog.InitFlags(nil)
