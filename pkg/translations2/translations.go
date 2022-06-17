@@ -255,10 +255,12 @@ func (km *KubeMapper) MapEndpointSliceToLocalityEndpoints(svc *v1.Service, endpo
 			}
 		}
 
-		// map endpoints
-		if _, ok := endpoints[clusterName][meta.locality]; !ok {
+		// make sure DS are ready
+		if _, ok := endpoints[clusterName]; !ok {
 			endpoints[clusterName] = make(map[locality][]*endpoint.LbEndpoint)
-			endpoints[clusterName][meta.locality] = make([]*endpoint.LbEndpoint, 0)
+		}
+		if _, ok := endpoints[clusterName][meta.locality]; !ok {
+			endpoints[clusterName][meta.locality] = make([]*endpoint.LbEndpoint, 0, 1)
 		}
 		endpoints[clusterName][meta.locality] = append(endpoints[clusterName][meta.locality], km.mapEndpointMetaAndStateToEndpoint(meta, state))
 	}
