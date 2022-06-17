@@ -1,0 +1,10 @@
+---
+namespace: lightpath-system
+commonLabels:
+  app.kubernetes.io/component: proxy
+resources:
+  - proxy.yaml
+configMapGenerator:
+  - name: proxy-config
+    files:
+      - "config/envoy.yaml"

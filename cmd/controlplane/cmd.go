@@ -14,17 +14,14 @@ import (
 
 var (
 	l          logger.Logger
-	port       uint
 	metricPort uint
 	nodeID     string
 
-	host string
-  kubeconfig string
+	host       string
+	kubeconfig string
 )
 
 func init() {
-	// The port that this xDS server listens on
-	flag.UintVar(&port, "port", 18000, "xDS management server port")
 	// Metric endpoint
 	flag.UintVar(&metricPort, "metric-port", 9000, "metric endpoint")
 	// Envoy controlplane node-id

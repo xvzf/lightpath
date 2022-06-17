@@ -2,9 +2,9 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: lightpath-service-label-webhook
+  name: service-label-webhook
   annotations:
-    cert-manager.io/inject-ca-from: lightpath-system/webhook-server
+    cert-manager.io/inject-ca-from: system/webhook-server
 webhooks:
   - name: service.labelinjection.lightpath
     admissionReviewVersions: ["v1"]
@@ -16,9 +16,9 @@ webhooks:
         port: 443
     namespaceSelector:
       matchExpressions:
-      - key: lightpath
-        operator: NotIn
-        values: ["disabled"]
+        - key: lightpath
+          operator: NotIn
+          values: ["disabled"]
     failurePolicy: Fail
     rules:
       - operations: ["CREATE"]

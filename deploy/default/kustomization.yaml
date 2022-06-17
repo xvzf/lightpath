@@ -1,0 +1,11 @@
+---
+namespace: lightpath-system
+namePrefix: lightpath-
+commonLabels:
+  app.kubernetes.io/part-of: lightpath
+resources:
+  - namespace.yaml
+bases:
+  - ../webhook
+  - ../proxy
+  - ../controlplane

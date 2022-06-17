@@ -1,6 +1,0 @@
----
-namespace: lightpath-system
-resources:
-- namespace.yaml
-bases:
-- ../webhook

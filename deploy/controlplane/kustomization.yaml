@@ -1,0 +1,6 @@
+namespace: lightpath-system
+commonLabels:
+  app.kubernetes.io/component: controlplane
+resources:
+  - rbac.yaml
+  - controlplane.yaml
