@@ -7,7 +7,7 @@ import (
 
 	"github.com/xvzf/lightpath/pkg/server"
 	"github.com/xvzf/lightpath/pkg/state"
-	"github.com/xvzf/lightpath/pkg/translations2"
+	"github.com/xvzf/lightpath/pkg/translations"
 	"github.com/xvzf/lightpath/pkg/wellknown"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,13 +35,12 @@ func updateSnapshot(ctx context.Context, server server.XdsServer, subscriber sta
 	defer recvCtxCancel()
 
 	if snap := subscriber.ReceiveEvent(recvCtx); snap != nil {
-		mapper := translations2.KubeMapper{}
-		// Snapshot extraction successful, try to ingest
-		// envoySnap, err := translations.EnvoySnapshotFromKubeSnapshot(snap)
+		mapper := translations.KubeMapper{}
 		envoySnap, err := mapper.EnvoySnapshotFromKubeSnapshot(snap)
 		if err != nil {
 			return err
 		}
+		// Snapshot extraction successful, try to ingest
 		err = server.UpdateSnapshot(ctx, envoySnap)
 		if err != nil {
 			return err

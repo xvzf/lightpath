@@ -1,4 +1,4 @@
-package translations2
+package translations
 
 import (
 	"fmt"
