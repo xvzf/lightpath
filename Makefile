@@ -61,6 +61,3 @@ k8s-down:
 
 run: default
 	./dist/$(GOOS)/$(GOARCH)/$(BIN_NAME) -v=3 --kubeconfig=${HOME}/.kube/config
-
-sync-remote:
-	rsync -chavzP --stats $(shell pwd) 89.58.46.82:/home/${USER} --exclude .vscode/ --exclude dist/

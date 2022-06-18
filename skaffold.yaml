@@ -1,0 +1,17 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: lightpath
+deploy:
+  kustomize:
+    paths:
+      - "./deploy/default"
+build:
+  artifacts:
+    - image: ghcr.io/xvzf/lightpath/controlplane
+      custom:
+        buildCommand: |
+          make DOCKER_BUILDX_ARGS=--load container-image-${IMAGE#*:}
+          if [ $IMAGE_PUSH="true" ]; then
+            docker push $IMAGE
+          fi
