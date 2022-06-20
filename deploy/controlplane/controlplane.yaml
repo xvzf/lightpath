@@ -24,9 +24,8 @@ spec:
                   apiVersion: v1
                   fieldPath: spec.nodeName
           args:
-            - --metric-port=9000
-            - --host="127.0.0.1:18000"
             - --nodeID=$(NODE_NAME)
+            - -v=3
           resources:
             requests:
               memory: 128Mi
