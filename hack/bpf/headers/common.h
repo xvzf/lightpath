@@ -2,7 +2,6 @@
 
 #include <linux/bpf.h>
 #include <linux/bpf_common.h>
-#include <linux/bpf.h>
 #include <linux/types.h>
 #include <linux/ip.h>
 #include <linux/ipv6.h>

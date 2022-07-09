@@ -9,6 +9,7 @@ static __u64 (*bpf_map_update_elem)(void *map, const void *key, const void *valu
 static __u64 (*bpf_map_delete_elem)(void *map, const void *key) = (void *)BPF_FUNC_map_delete_elem;
 static __u64 (*bpf_get_socket_cookie)(void *ctx) = (void *)BPF_FUNC_get_socket_cookie;
 static __u32 (*bpf_sock_hash_update)(void *skt, void *map, void *key, __u64 flags) = (void *)BPF_FUNC_sock_hash_update;
+static __u32 (*bpf_msg_redirect_hash)(struct sk_msg_md *md, void *map, void *key, __u64 flags) = (void *)BPF_FUNC_msg_redirect_hash;
 
 // IPv4 cluster ip inclusion list; this map is dual stack!
 struct bpf_map_def __attribute__((section("maps"), used)) cluster_ip_inclusion_map = {
