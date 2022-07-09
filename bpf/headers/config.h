@@ -3,7 +3,9 @@
 #define DEBUG
 
 #ifndef LIGHTPATH_IP4_IP
-#define LIGHTPATH_IP4_IP 0xa9fefafa // 169.254.250.250 // Do not collide with e.g. GCP internal metadata serv ices
+#define LIGHTPATH_IP4_IP                                                       \
+  0xa9fefafa // 169.254.250.250 // Do not collide with e.g. GCP internal
+             // metadata serv ices
 #endif
 
 #ifndef LIGHTPATH_IP6_IP

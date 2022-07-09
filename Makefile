@@ -19,6 +19,7 @@ default: clean lint test build
 
 lint:
 	go vet ./...
+	clang-format --Werror bpf/*.c bpf/headers/*.h -n
 # golangci-lint run
 
 clean:
@@ -30,6 +31,9 @@ test: clean
 
 dist:
 	mkdir dist
+
+compile-bpf:
+	make -C bpf compile
 
 build: clean dist
 	@echo SHA: $(SHA) $(BUILD_DATE)
