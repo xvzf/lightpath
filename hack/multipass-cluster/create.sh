@@ -59,6 +59,9 @@ for ((i=0; i<(node_count - 1); i++)); do
     echo "[+] Created node ${node_name}"
 done
 
+# Install cert-manager
+multipass exec "$master_name" -- sudo kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml
+
 # Write kubeconfig
 echo "[+] Exporting kubeconfig"
 kubeconfig=$(mktemp)
