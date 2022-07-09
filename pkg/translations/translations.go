@@ -141,16 +141,18 @@ func (km *KubeMapper) MapServicePortToListeners(svc *v1.Service, port *v1.Servic
 	}
 
 	// map NodePort
-	for _, ipFamily := range svc.Spec.IPFamilies {
-		targetClusterName := getClusterName(svc.Namespace, svc.Name, string(ipFamily), port.TargetPort.IntVal)
-		ip := "0.0.0.0"
-		if ipFamily == v1.IPv6Protocol {
-			ip = "::"
-		}
-		listenerName := getListenerName(svc.Namespace, svc.Name, ip, port.NodePort)
+	if svc.Spec.Type == "NodePort" {
+		for _, ipFamily := range svc.Spec.IPFamilies {
+			targetClusterName := getClusterName(svc.Namespace, svc.Name, string(ipFamily), port.TargetPort.IntVal)
+			ip := "0.0.0.0"
+			if ipFamily == v1.IPv6Protocol {
+				ip = "::"
+			}
+			listenerName := getListenerName(svc.Namespace, svc.Name, ip, port.NodePort)
 
-		listener := km.genTCPListener(listenerName, ip, port.NodePort, true, targetClusterName)
-		buf = append(buf, listener)
+			listener := km.genTCPListener(listenerName, ip, port.NodePort, true, targetClusterName)
+			buf = append(buf, listener)
+		}
 	}
 
 	return buf
