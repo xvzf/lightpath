@@ -13,18 +13,17 @@ metadata:
 spec:
   secretName: webhook-server-tls
   dnsNames:
-    - webhook-server
-    - webhook-server.lightpath-system.svc
-    - webhook-server.lightpath-system.svc.cluster
-    - webhook-server.lightpath-system.svc.cluster.local
+    - lightpath-webhook-server
+    - lightpath-webhook-server.lightpath-system.svc
+    - lightpath-webhook-server.lightpath-system.svc.cluster
+    - lightpath-webhook-server.lightpath-system.svc.cluster.local
   issuerRef:
-    name: opa-selfsigned
+    name: lightpath-opa-selfsigned # Kustomize can't traverse this to a named prefix
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name:
-    webhook-server
+  name: webhook-server
 spec:
   selector:
     app.kubernetes.io/name: webhook-server

@@ -4,7 +4,7 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: service-label-webhook
   annotations:
-    cert-manager.io/inject-ca-from: system/webhook-server
+    cert-manager.io/inject-ca-from: lightpath-system/lightpath-webhook-server
 webhooks:
   - name: service.labelinjection.lightpath
     admissionReviewVersions: ["v1"]
