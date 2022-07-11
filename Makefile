@@ -1,10 +1,10 @@
 .PHONY: clean lint test build k8s-up k8s-down
-BIN_NAME := controlplane
-MAIN_DIRECTORY := ./cmd/controlplane
+BIN_NAMES=controlplane redirect
+CMD_DIRECTORY := ./cmd
 
 # GIT_REPO := github.com/xvzf/lightpath
 GIT_REPO := github.com/xvzf/lightpath
-IMAGE_REPO := ghcr.io/xvzf/lightpath/controlplane
+IMAGE_REPO := ghcr.io/xvzf/lightpath
 
 TAG_NAME := $(shell git tag -l --contains HEAD)
 SHA := $(shell git rev-parse HEAD)
@@ -32,14 +32,14 @@ test: clean
 dist:
 	mkdir dist
 
-compile-bpf:
-	make -C bpf compile
+build: clean dist $(patsubst %, build-%, $(BIN_NAMES))
 
-build: clean dist
-	@echo SHA: $(SHA) $(BUILD_DATE)
+build-%:
+	@echo [$*] SHA: $(SHA) $(BUILD_DATE)
 	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -v \
 		-ldflags '-X "${GIT_REPO}/internal/version.commit=${SHA}" -X "${GIT_REPO}/internal/version.date=${BUILD_DATE}" -X "${GIT_REPO}/internal/version.tag=${TAG_NAME}"' \
-		-o "./dist/${GOOS}/${GOARCH}/${BIN_NAME}" ${MAIN_DIRECTORY}
+		-o "./dist/${GOOS}/${GOARCH}/${BIN_NAME}" ${CMD_DIRECTORY}/$*
+
 
 build-linux-arm64: export GOOS := linux
 build-linux-arm64: export GOARCH := arm64
@@ -52,7 +52,10 @@ build-linux-amd64:
 
 ## Build Multi archs Docker image
 container-image-%: build-linux-amd64 build-linux-arm64
-	docker buildx build $(DOCKER_BUILDX_ARGS) --progress=chain -t $(IMAGE_REPO):$* --platform=$(DOCKER_BUILD_PLATFORMS) -f buildx.Dockerfile .
+	make IMAGE_TAG=$* $(patsubst %, container-image-target-%, $(BIN_NAMES))
+
+container-image-target-%:
+	docker buildx build $(DOCKER_BUILDX_ARGS) --progress=chain -t $(IMAGE_REPO)/$*:${IMAGE_TAG} --platform=$(DOCKER_BUILD_PLATFORMS) -f $*.Dockerfile .
 
 .PHONY: k8s-up
 k8s-up:
@@ -62,6 +65,3 @@ k8s-up:
 .PHONY: k8s-down
 k8s-down:
 	kind delete cluster --name=lightpath-ci
-
-run: default
-	./dist/$(GOOS)/$(GOARCH)/$(BIN_NAME) -v=3 --kubeconfig=${HOME}/.kube/config
