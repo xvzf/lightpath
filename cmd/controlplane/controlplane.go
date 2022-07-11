@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xvzf/lightpath/internal/utils"
 	"github.com/xvzf/lightpath/pkg/server"
 	"github.com/xvzf/lightpath/pkg/state"
 	"github.com/xvzf/lightpath/pkg/translations"
@@ -59,7 +60,7 @@ func run(parentCtx context.Context) error {
 	defer cancelCtx()
 
 	// Create clients
-	client, _, err := createClients(kubeconfig)
+	client, _, err := utils.CreateClients(kubeconfig)
 	if err != nil {
 		return err
 	}
@@ -114,7 +115,7 @@ func run(parentCtx context.Context) error {
 	serviceConfig.RegisterEventHandler(stateSubscriber)
 	endpointSliceConfig.RegisterEventHandler(stateSubscriber)
 
-	// Waitgroup for asunc tasks
+	// Waitgroup for async tasks
 	var wg sync.WaitGroup
 
 	// Start informer

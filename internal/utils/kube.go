@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	clientset "k8s.io/client-go/kubernetes"
@@ -8,7 +8,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func createClients(kubeconfig string) (clientset.Interface, corev1.EventsGetter, error) {
+func CreateClients(kubeconfig string) (clientset.Interface, corev1.EventsGetter, error) {
 	var kubeConfig *rest.Config
 	var err error
 
