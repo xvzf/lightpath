@@ -13,7 +13,8 @@ BUILD_DATE := $(shell date -u '+%Y-%m-%d_%I:%M:%S%p')
 # Default build target
 GOOS := $(shell go env GOOS)
 GOARCH := $(shell go env GOARCH)
-DOCKER_BUILD_PLATFORMS ?= linux/amd64,linux/arm64
+# DOCKER_BUILD_PLATFORMS ?= linux/amd64,linux/arm64
+DOCKER_BUILD_PLATFORMS ?= linux/amd64
 
 default: clean lint test build
 

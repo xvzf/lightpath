@@ -1,9 +1,20 @@
 # syntax=docker/dockerfile:1.2
 
-FROM gcr.io/distroless/static
+FROM ubuntu:jammy
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+  apt-get install --no-install-recommends -y \
+  iptables \
+  && apt-get upgrade -y \
+  && apt-get clean \
+  && rm -rf  /var/log/*log /var/lib/apt/lists/* /var/log/apt/* /var/lib/dpkg/*-old /var/cache/debconf/*-old \
+  && update-alternatives --set iptables /usr/sbin/iptables-legacy \
+  && update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 
 ARG TARGETPLATFORM
 COPY ./dist/$TARGETPLATFORM/redirect /
 
-USER 65534
+USER 0
 ENTRYPOINT ["/redirect"]
