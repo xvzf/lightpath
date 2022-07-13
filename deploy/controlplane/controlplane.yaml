@@ -34,8 +34,9 @@ spec:
               memory: 150Mi
               cpu: 200m
           securityContext:
-            allowPrivilegeEscalation: true
+            allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            runAsUser: 65534
       volumes:
         - name: config
           configMap:

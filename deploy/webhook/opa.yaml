@@ -63,6 +63,7 @@ spec:
         app.kubernetes.io/name: webhook-server
       name: webhook-server
     spec:
+      serviceAccountName: webhook
       containers:
         - image: openpolicyagent/opa:0.41.0-static
           name: opa

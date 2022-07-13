@@ -1,8 +1,8 @@
 ---
-namespace: lightpath-system
 commonLabels:
   app.kubernetes.io/component: proxy
 resources:
+  - rbac.yaml
   - proxy.yaml
 configMapGenerator:
   - name: proxy-config

@@ -1,0 +1,5 @@
+commonLabels:
+  app.kubernetes.io/component: redirect
+resources:
+  - rbac.yaml
+  - redirect.yaml

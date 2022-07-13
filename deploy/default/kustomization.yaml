@@ -9,3 +9,4 @@ bases:
   - ../webhook
   - ../proxy
   - ../controlplane
+  - ../redirect
