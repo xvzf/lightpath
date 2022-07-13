@@ -58,13 +58,13 @@ func (ir *IptablesRedirect) Prereqs() error {
 	}
 
 	// Setup chain lookup
-	_, err = ir.iptables.EnsureRule(iptables.Append, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
+	_, err = ir.iptables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
 	if err != nil {
 		klog.ErrorS(err, "Failed to ensure iptables chain (IPv4)")
 		return err
 	}
 
-	_, err = ir.ip6tables.EnsureRule(iptables.Append, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
+	_, err = ir.ip6tables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
 	if err != nil {
 		klog.ErrorS(err, "Failed to ensure iptables chain (IPv6)")
 		return err
