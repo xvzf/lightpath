@@ -44,7 +44,6 @@ spec:
           livenessProbe:
             httpGet:
               port: admin-http
-              scheme: HTTPS
               path: /ready
           readinessProbe:
             httpGet:
