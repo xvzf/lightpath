@@ -56,11 +56,15 @@ func (ir *IptablesRedirect) Prereqs() error {
 	return nil
 }
 
+func (ir *IptablesRedirect) redirArgs(comment string, ip net.IP) []string {
+	return []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-j", "-p", "tcp", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
+}
+
 func (ir *IptablesRedirect) AddIP(comment string, ip net.IP) error {
 	ir.m.Lock()
 	defer ir.m.Unlock()
 
-	redirectArgs := []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-j", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
+	redirectArgs := ir.redirArgs(comment, ip)
 
 	var err error
 
@@ -79,7 +83,7 @@ func (ir *IptablesRedirect) RemoveIP(comment string, ip net.IP) error {
 	ir.m.Lock()
 	defer ir.m.Unlock()
 
-	redirectArgs := []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-j", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
+	redirectArgs := ir.redirArgs(comment, ip)
 
 	var err error
 
