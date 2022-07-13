@@ -64,7 +64,8 @@ func run(parentCtx context.Context) error {
 
 	// Attach service informer to redirect handler
 	svcInformer := informerFactory.Core().V1().Services()
-	svcInformer.Informer().AddEventHandler(nil) // FIXME
+
+	svcInformer.Informer().AddEventHandler(redirect.NewEventHandler(redirectImpl))
 
 	// Gogogo
 	redirectImpl.Prereqs()
