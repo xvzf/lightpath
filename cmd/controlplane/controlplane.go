@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/xvzf/lightpath/internal/utils"
 	"github.com/xvzf/lightpath/pkg/server"
 	"github.com/xvzf/lightpath/pkg/state"
@@ -80,6 +81,7 @@ func run(parentCtx context.Context) error {
 	if err != nil {
 		return err
 	}
+	xdsServer.UpdateSnapshot(ctx, &cache.Snapshot{}) // Empty initial snapshot (otherwise envoy cannot connect)
 
 	// We're implementing an alternative proxy for lightpath -> let's
 	lightPathProxy, err := labels.NewRequirement(proxyapis.LabelServiceProxyName, selection.Equals, []string{wellknown.LightpathProxyName})
