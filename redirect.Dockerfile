@@ -10,8 +10,8 @@ RUN apt-get update && \
   && apt-get upgrade -y \
   && apt-get clean \
   && rm -rf  /var/log/*log /var/lib/apt/lists/* /var/log/apt/* /var/lib/dpkg/*-old /var/cache/debconf/*-old \
-  && update-alternatives --set iptables /usr/sbin/iptables-legacy \
-  && update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+  && update-alternatives --set iptables /usr/sbin/iptables-nft \
+  && update-alternatives --set ip6tables /usr/sbin/ip6tables-nft
 
 ARG TARGETPLATFORM
 COPY ./dist/$TARGETPLATFORM/redirect /
