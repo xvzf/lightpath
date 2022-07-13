@@ -22,6 +22,10 @@ const (
 	iptablesLightpathChainName = "LIGHTPATH-SVC-REDIRECT"
 )
 
+var (
+	lightpathIptablesPreroutingArgs []string = []string{"-m", "comment", "--comment", "lightpath prerouting rules", "-j", iptablesLightpathChainName}
+)
+
 type IptablesRedirect struct {
 	m sync.Mutex
 
@@ -48,6 +52,19 @@ func (ir *IptablesRedirect) Prereqs() error {
 	}
 
 	_, err = ir.ip6tables.EnsureChain(iptables.TableNAT, iptablesLightpathChainName)
+	if err != nil {
+		klog.ErrorS(err, "Failed to ensure iptables chain (IPv6)")
+		return err
+	}
+
+	// Setup chain lookup
+	_, err = ir.iptables.EnsureRule(iptables.Append, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
+	if err != nil {
+		klog.ErrorS(err, "Failed to ensure iptables chain (IPv4)")
+		return err
+	}
+
+	_, err = ir.ip6tables.EnsureRule(iptables.Append, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
 	if err != nil {
 		klog.ErrorS(err, "Failed to ensure iptables chain (IPv6)")
 		return err
@@ -107,17 +124,15 @@ func (ir *IptablesRedirect) Cleanup() error {
 	ir.m.Lock()
 	defer ir.m.Unlock()
 
-	preroutingArgs := []string{"-m", "comment", "--comment", "lightpath prerouting rules", "-j", iptablesLightpathChainName}
-
 	// We want to catch all errors but continue the cleanup
 	var lastErr error = nil
 
 	// Delete prerouting rules
-	if err := ir.iptables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, preroutingArgs...); err != nil && iptables.IsNotFoundError(err) {
+	if err := ir.iptables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...); err != nil && iptables.IsNotFoundError(err) {
 		klog.ErrorS(err, "Failed to delete jump to chain rule (IPv4)")
 		lastErr = err
 	}
-	if err := ir.ip6tables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, preroutingArgs...); err != nil && iptables.IsNotFoundError(err) {
+	if err := ir.ip6tables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...); err != nil && iptables.IsNotFoundError(err) {
 		klog.ErrorS(err, "Failed to delete jump to chain rule (IPv6)")
 		lastErr = err
 	}

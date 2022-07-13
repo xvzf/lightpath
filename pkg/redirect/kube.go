@@ -55,6 +55,8 @@ func NewEventHandler(impl Redirect) cache.ResourceEventHandlerFuncs {
 				err := impl.AddIP(comment, net.ParseIP(ip))
 				if err != nil {
 					klog.ErrorS(err, "failed to add IP", "ip", ip)
+				} else {
+					klog.V(3).InfoS("added", "ip", ip)
 				}
 			}
 		},
@@ -71,6 +73,8 @@ func NewEventHandler(impl Redirect) cache.ResourceEventHandlerFuncs {
 				err := impl.AddIP(comment, ip)
 				if err != nil {
 					klog.ErrorS(err, "failed to add IP", "ip", fmt.Sprint(ip))
+				} else {
+					klog.V(3).InfoS("added", "ip", ip)
 				}
 			}
 
@@ -78,6 +82,8 @@ func NewEventHandler(impl Redirect) cache.ResourceEventHandlerFuncs {
 				err := impl.RemoveIP(comment, ip)
 				if err != nil {
 					klog.ErrorS(err, "failed to remove IP", "ip", fmt.Sprint(ip))
+				} else {
+					klog.V(3).InfoS("removed", "ip", ip)
 				}
 			}
 		},
@@ -90,6 +96,8 @@ func NewEventHandler(impl Redirect) cache.ResourceEventHandlerFuncs {
 				err := impl.RemoveIP(comment, net.ParseIP(ip))
 				if err != nil {
 					klog.ErrorS(err, "failed to remove IP", "ip", ip)
+				} else {
+					klog.V(3).InfoS("removed", "ip", ip)
 				}
 			}
 		},

@@ -77,7 +77,7 @@ func run(parentCtx context.Context) error {
 			cancelCtx()
 			return fmt.Errorf("failed to sync cache for %v", informerType)
 		}
-		klog.Info("Synced cache for %v", informerType)
+		klog.Info("Synced cache for ", informerType)
 	}
 
 	// Wait for context to be done & cleanup

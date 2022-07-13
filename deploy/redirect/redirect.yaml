@@ -33,10 +33,10 @@ spec:
             - mountPath: /run/xtables.lock
               name: xtables-lock
           securityContext:
-            readOnlyRootFilesystem: true
+            # readOnlyRootFilesystem: true
             privileged: true
-            capabilities:
-              drop:
-                - all
-              add:
-                - CAP_NET_ADMIN
+            # capabilities:
+            #   drop:
+            #     - all
+            #   add:
+            #     - CAP_NET_ADMIN
