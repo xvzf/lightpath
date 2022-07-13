@@ -74,7 +74,7 @@ func (ir *IptablesRedirect) Prereqs() error {
 }
 
 func (ir *IptablesRedirect) redirArgs(comment string, ip net.IP) []string {
-	return []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-p", "tcp", "-j", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
+	return []string{"-m", "comment", "--comment", comment, "-d", ip.String(), "-p", "tcp", "-j", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
 }
 
 func (ir *IptablesRedirect) AddIP(comment string, ip net.IP) error {
