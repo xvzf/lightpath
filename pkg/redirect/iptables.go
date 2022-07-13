@@ -13,7 +13,7 @@ import (
 //
 // 1. create a chain for k8s svc (in our case we want to have postrouting): iptables -N LIGHTPATH-SVC-REDIRECT
 // 2. Before routing, redirect: -A PREROUTING -m comment --comment "lightpath prerouting rules" -j LIGHTPATH-SVC-REDIRECT
-// [3. For each service, add a REDIRECT target to envoy: -A LIGHTPATH-SVC-REDIRECT -s <src-ip> -p tcp -J REDIRECT --to-port <envoy proxy port; 1666>] -m comment --comment "lightpath:<namespace>/<svc-name>"
+// [3. For each service, add a REDIRECT target to envoy: -A LIGHTPATH-SVC-REDIRECT -s <src-ip> -p tcp -j REDIRECT --to-port <envoy proxy port; 1666>] -m comment --comment "lightpath:<namespace>/<svc-name>"
 //
 // Step 3 could likely change -> lightpath needs to maintain the current and desired state; only to apply the diff
 //
@@ -60,7 +60,7 @@ func (ir *IptablesRedirect) AddIP(comment string, ip net.IP) error {
 	ir.m.Lock()
 	defer ir.m.Unlock()
 
-	redirectArgs := []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-J", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
+	redirectArgs := []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-j", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
 
 	var err error
 
@@ -79,7 +79,7 @@ func (ir *IptablesRedirect) RemoveIP(comment string, ip net.IP) error {
 	ir.m.Lock()
 	defer ir.m.Unlock()
 
-	redirectArgs := []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-J", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
+	redirectArgs := []string{"-m", "comment", "--comment", comment, "-s", ip.String(), "-j", "REDIRECT", "--to-port", fmt.Sprint(ir.envoyPort)}
 
 	var err error
 
