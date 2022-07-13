@@ -4,6 +4,7 @@ commonLabels:
   app.kubernetes.io/component: webhook
 
 resources:
+  - rbac.yaml
   - opa.yaml
   - webhook.yaml
 

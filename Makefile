@@ -62,6 +62,7 @@ container-image-target-%:
 k8s-up:
 	kind create cluster --config ./hack/ci/kind-cluster.yaml --wait 120s --name=lightpath-ci
 	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml
+	kubectl config set-context --current --namespace=lightpath-system
 
 .PHONY: k8s-down
 k8s-down:
