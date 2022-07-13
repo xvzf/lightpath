@@ -130,7 +130,7 @@ func run(parentCtx context.Context) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		klog.Info("Starting xDS Server")
+		klog.Info("Starting xDS Server on %s", host)
 		err := xdsServer.Start(ctx)
 		if err != nil {
 			klog.Error(err, "xDS Server failure")
