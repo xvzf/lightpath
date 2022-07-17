@@ -1,0 +1,13 @@
+---
+namespace: prometheus
+commonLabels:
+  app.kubernetes.io/part-of: prometheus
+resources:
+  - sts.yaml
+  - rbac.yaml
+
+# Load prometheus config from directory
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - prometheus.yaml=config/prometheus-config.yaml

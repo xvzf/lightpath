@@ -1,0 +1,95 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: prometheus
+  name: prometheus
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9090
+  selector:
+    name: prometheus
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: prometheus
+  serviceName: prometheus
+  template:
+    metadata:
+      labels:
+        name: prometheus
+    spec:
+      containers:
+        - args:
+            - --config.file=/etc/prometheus/prometheus.yaml
+            - --web.listen-address=:9090
+            - --web.enable-admin-api
+            - --web.enable-lifecycle
+            - --web.enable-remote-write-receiver
+            - --web.external-url=/prometheus/
+            - --storage.tsdb.path=/prometheus/data
+            - --storage.tsdb.wal-compression
+            - --storage.tsdb.retention.time=6m  # We are evaluating benchmarks -> let's keep data long term until it gets exportet.
+          image: prom/prometheus:v2.37.0
+          imagePullPolicy: IfNotPresent
+          name: prometheus
+          ports:
+            - containerPort: 9090
+              name: http
+          resources:
+            # FIXME: this is required when ingesting huge amounts of data
+            # limits:
+            #   cpu: 6
+            #   memory: 60GI
+            requests:
+              cpu: 1
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /prometheus
+              name: prometheus-data
+            - mountPath: /etc/prometheus
+              name: prometheus-config
+          securityContext:
+            readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              port: http
+              path: /prometheus/-/healthy
+            initialDelaySeconds: 120
+          readinessProbe:
+            httpGet:
+              port: http
+              path: /prometheus/-/ready
+            initialDelaySeconds: 120
+      priorityClassName: system-cluster-critical
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 1000
+      serviceAccountName: prometheus
+      volumes:
+        - configMap:
+            name: prometheus-config
+          name: prometheus-config
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: prometheus-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi

@@ -1,0 +1,6 @@
+namespace: prometheus
+bases:
+- ../../../../base/apps/prometheus/
+resources:
+- namespace.yaml
+- ingress.yaml
