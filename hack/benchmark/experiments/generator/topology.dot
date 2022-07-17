@@ -1,0 +1,74 @@
+digraph {
+  node [
+    fontsize = "16"
+    fontname = "courier"
+    shape = plaintext
+  ];
+
+  "svc-0" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-0</B><BR />Type: HTTP<BR />Err: 0.10%</TD></TR>
+  <TR><TD PORT="0">SLEEP 10ms</TD></TR>
+</TABLE>>];
+
+  "svc-1" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-1</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+</TABLE>>];
+
+  "svc-2" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-2</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc-0" 10KiB</TD></TR>
+  <TR><TD PORT="1">CALL "svc-1" 8KiB</TD></TR>
+</TABLE>>];
+
+  "svc-3" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-3</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc-0" 8KiB<BR />CALL "svc-2" 8KiB</TD></TR>
+  <TR><TD PORT="1">SLEEP 5ms</TD></TR>
+  <TR><TD PORT="2">CALL "svc-1" 8KiB<BR />CALL "svc-4" 8KiB</TD></TR>
+</TABLE>>];
+
+  "svc-4" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-4</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc-5" 8KiB<BR />CALL "svc-6" 8KiB</TD></TR>
+</TABLE>>];
+
+  "svc-6" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-6</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc-7" 8KiB</TD></TR>
+</TABLE>>];
+
+  "svc-5" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-5</B><BR />Type: HTTP<BR />Err: 2.00%</TD></TR>
+  <TR><TD PORT="0">SLEEP 6ms</TD></TR>
+</TABLE>>];
+
+  "svc-6" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-6</B><BR />Type: HTTP<BR />Err: 4.00%</TD></TR>
+  <TR><TD PORT="0">SLEEP 3ms</TD></TR>
+</TABLE>>];
+
+  "svc-7" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc-7</B><BR />Type: HTTP<BR />Err: 1.00%</TD></TR>
+  <TR><TD PORT="0">SLEEP 3ms</TD></TR>
+</TABLE>>];
+
+  
+  "svc-2":0 -> "svc-0"
+  "svc-2":1 -> "svc-1"
+  "svc-3":0 -> "svc-0"
+  "svc-3":0 -> "svc-2"
+  "svc-3":2 -> "svc-1"
+  "svc-3":2 -> "svc-4"
+  "svc-4":0 -> "svc-5"
+  "svc-4":0 -> "svc-6"
+  "svc-6":0 -> "svc-7"
+}

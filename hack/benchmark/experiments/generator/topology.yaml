@@ -1,0 +1,49 @@
+apiVersion: v1alpha1
+kind: MockServiceGraph
+defaults:
+  type: http
+  requestSize: 8 KB
+  responseSize: 8 KB
+
+services:
+- name: svc-0
+  errorRate: 0.1%
+  script:
+  - sleep: 10ms
+
+- name: svc-1
+
+- name: svc-2
+  isEntrypoint: true
+  script:
+  - call:
+      service: svc-0
+      size: 10K
+  - call: svc-1
+
+- name: svc-3
+  script:
+  - - call: svc-0
+    - call: svc-2
+  - sleep: 5ms
+  - - call: svc-1
+    - call: svc-4
+
+- name: svc-4
+  script:
+  - - call: svc-5
+    - call: svc-6
+
+- name: svc-5
+  script:
+  - call: svc-7
+
+- name: svc-6
+  errorRate: 2%
+  script:
+  - sleep: 6ms
+
+- name: svc-7
+  errorRate: 4%
+  script:
+  - sleep: 3ms
