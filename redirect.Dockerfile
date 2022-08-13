@@ -1,6 +1,10 @@
 # syntax=docker/dockerfile:1.2
-FROM alpine:3.15.4
-RUN apk add -U --no-cache iptables ip6tables
+FROM xenial
+
+RUN apt-get update && apt-get install -y \
+  iptables \
+  && rm -rf /var/lib/apt/lists/*
+
 
 ARG TARGETPLATFORM
 COPY ./dist/$TARGETPLATFORM/redirect /
