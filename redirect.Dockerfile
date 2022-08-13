@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.2
 FROM alpine:latest
 
-RUN apk add --no-cache iptables && rm /sbin/iptables && ln -s /sbin/iptables /sbin/iptables-nft
+RUN apk add --no-cache iptables && rm /sbin/iptables && ln -s /sbin/iptables-nft /sbin/iptables
 
 ARG TARGETPLATFORM
 COPY ./dist/$TARGETPLATFORM/redirect /
