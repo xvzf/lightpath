@@ -19,8 +19,14 @@ spec:
             path: /run/xtables.lock
             type: FileOrCreate
           name: xtables-lock
+        - hostPath:
+            path: /lib/modules
+          name: lib-modules
       containers:
         - image: ghcr.io/xvzf/lightpath/redirect:latest
+          imagePullPolicy: Always
+          args:
+          - -v=3
           name: redirect
           resources:
             requests:
@@ -32,6 +38,9 @@ spec:
           volumeMounts:
             - mountPath: /run/xtables.lock
               name: xtables-lock
+            - mountPath: /lib-modules
+              name: lib-modules
+              readOnly: true
           securityContext:
             # readOnlyRootFilesystem: true
             privileged: true
@@ -40,3 +49,26 @@ spec:
             #     - all
             #   add:
             #     - CAP_NET_ADMIN
+      tolerations:
+        - operator: Exists
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/disk-pressure
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/memory-pressure
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/pid-pressure
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/unschedulable
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/network-unavailable
+          operator: Exists

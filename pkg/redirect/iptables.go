@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	lightpathIptablesPreroutingArgs []string = []string{"-m", "comment", "--comment", "lightpath prerouting rules", "-j", iptablesLightpathChainName}
+	lightpathIptablesJumpChainArgs []string = []string{"-m", "comment", "--comment", "lightpath prerouting rules", "-j", iptablesLightpathChainName}
 )
 
 type IptablesRedirect struct {
@@ -58,13 +58,23 @@ func (ir *IptablesRedirect) Prereqs() error {
 	}
 
 	// Setup chain lookup
-	_, err = ir.iptables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
+	_, err = ir.iptables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesJumpChainArgs...)
+	if err != nil {
+		klog.ErrorS(err, "Failed to ensure iptables chain (IPv4)")
+		return err
+	}
+	_, err = ir.iptables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainOutput, lightpathIptablesJumpChainArgs...)
 	if err != nil {
 		klog.ErrorS(err, "Failed to ensure iptables chain (IPv4)")
 		return err
 	}
 
-	_, err = ir.ip6tables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...)
+	_, err = ir.ip6tables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesJumpChainArgs...)
+	if err != nil {
+		klog.ErrorS(err, "Failed to ensure iptables chain (IPv6)")
+		return err
+	}
+	_, err = ir.ip6tables.EnsureRule(iptables.Prepend, iptables.TableNAT, iptables.ChainOutput, lightpathIptablesJumpChainArgs...)
 	if err != nil {
 		klog.ErrorS(err, "Failed to ensure iptables chain (IPv6)")
 		return err
@@ -128,11 +138,19 @@ func (ir *IptablesRedirect) Cleanup() error {
 	var lastErr error = nil
 
 	// Delete prerouting rules
-	if err := ir.iptables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...); err != nil && iptables.IsNotFoundError(err) {
+	if err := ir.iptables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesJumpChainArgs...); err != nil && iptables.IsNotFoundError(err) {
 		klog.ErrorS(err, "Failed to delete jump to chain rule (IPv4)")
 		lastErr = err
 	}
-	if err := ir.ip6tables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesPreroutingArgs...); err != nil && iptables.IsNotFoundError(err) {
+	if err := ir.iptables.DeleteRule(iptables.TableNAT, iptables.ChainOutput, lightpathIptablesJumpChainArgs...); err != nil && iptables.IsNotFoundError(err) {
+		klog.ErrorS(err, "Failed to delete jump to chain rule (IPv6)")
+		lastErr = err
+	}
+	if err := ir.ip6tables.DeleteRule(iptables.TableNAT, iptables.ChainPrerouting, lightpathIptablesJumpChainArgs...); err != nil && iptables.IsNotFoundError(err) {
+		klog.ErrorS(err, "Failed to delete jump to chain rule (IPv6)")
+		lastErr = err
+	}
+	if err := ir.ip6tables.DeleteRule(iptables.TableNAT, iptables.ChainOutput, lightpathIptablesJumpChainArgs...); err != nil && iptables.IsNotFoundError(err) {
 		klog.ErrorS(err, "Failed to delete jump to chain rule (IPv6)")
 		lastErr = err
 	}
