@@ -1,10 +1,7 @@
 # syntax=docker/dockerfile:1.2
 FROM ubuntu:xenial
 
-RUN apt-get update && apt-get install -y \
-  iptables \
-  && rm -rf /var/lib/apt/lists/*
-
+RUN apk add --no-cache iptables && rm /sbin/iptables && ln -s /sbin/iptables /sbin/iptables-nft
 
 ARG TARGETPLATFORM
 COPY ./dist/$TARGETPLATFORM/redirect /
