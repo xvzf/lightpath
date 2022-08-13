@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM xenial
+FROM ubuntu:xenial
 
 RUN apt-get update && apt-get install -y \
   iptables \
