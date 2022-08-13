@@ -29,6 +29,10 @@ patch_conditions {
 	# Only applies when the label does not exist
 	not input.request.object.metadata.labels["service.kubernetes.io/service-proxy-name"]
 
+	# FIXME change to opt-in
+	# Only applies when it's not disabled
+	not input.request.object.metadata.labels["lightpath.cloud/proxy"] == "disabled"
+
 	# Exclude well-known namespaces we are relying on
 	not input.object.metadata.namespace[well_known_exclusions]
 }
@@ -42,7 +46,7 @@ patch[p] {
 		"op": "add",
 		# Well-known label as defined here: https://kubernetes.io/docs/reference/labels-annotations-taints/#servicekubernetesioservice-proxy-name
 		"path": "/metadata/labels/service.kubernetes.io~1service-proxy-name",
-		"value": "lightpath",
+		"value": "lightpath.cloud",
 	}
 }
 
@@ -54,7 +58,7 @@ patch[p] {
 		"op": "add",
 		# Well-known label as defined here: https://kubernetes.io/docs/reference/labels-annotations-taints/#servicekubernetesioservice-proxy-name
 		"path": "/metadata/labels",
-		"value": {"service.kubernetes.io/service-proxy-name": "lightpath"},
+		"value": {"service.kubernetes.io/service-proxy-name": "lightpath.cloud"},
 	}
 }
 
