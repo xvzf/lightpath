@@ -29,7 +29,7 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 	accessLogConfig, err := anypb.New(&streamaccessloggerv3.StdoutAccessLog{
 		AccessLogFormat: &streamaccessloggerv3.StdoutAccessLog_LogFormat{
 			LogFormat: &corev3.SubstitutionFormatString{
-				OmitEmptyValues: true,
+				Format: &corev3.SubstitutionFormatString_TextFormat{},
 			},
 		},
 	})
