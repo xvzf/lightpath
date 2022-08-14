@@ -3,9 +3,11 @@ package translations
 import (
 	"time"
 
+	accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	streamaccessloggerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/stream/v3"
 	router "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
@@ -19,6 +21,18 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 
 	// Bootstrap router config
 	routerConfig, err := anypb.New(&router.Router{})
+	if err != nil {
+		panic(err) // this should never happen!
+	}
+
+	// Access log config; just the envoy defaults for now.
+	accessLogConfig, err := anypb.New(&streamaccessloggerv3.StdoutAccessLog{
+		AccessLogFormat: &streamaccessloggerv3.StdoutAccessLog_LogFormat{
+			LogFormat: &corev3.SubstitutionFormatString{
+				OmitEmptyValues: true,
+			},
+		},
+	})
 	if err != nil {
 		panic(err) // this should never happen!
 	}
@@ -45,6 +59,13 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 			Name: wellknown.Router,
 			ConfigType: &hcm.HttpFilter_TypedConfig{
 				TypedConfig: routerConfig,
+			},
+		}},
+		// Access logging
+		AccessLog: []*accesslogv3.AccessLog{{
+			Name: "envoy.access_loggers.stdout", // FIXME this should be a well-known
+			ConfigType: &accesslogv3.AccessLog_TypedConfig{
+				TypedConfig: accessLogConfig,
 			},
 		}},
 		// Route configuration; we just have one default route here.
