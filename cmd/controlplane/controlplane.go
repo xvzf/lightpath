@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	RESYNC_INTERVAL           = 4 * time.Second
+	RESYNC_INTERVAL           = 60 * time.Second
 	NEW_SNAPSHOT_WAIT_TIMEOUT = 10 * time.Second
 
 	GRPC_KEEPALIVE_TIME         = 10 * time.Second
@@ -83,7 +83,6 @@ func run(parentCtx context.Context) error {
 	}
 	xdsServer.UpdateSnapshot(ctx, &cache.Snapshot{}) // Empty initial snapshot (otherwise envoy cannot connect)
 
-	// We're implementing an alternative proxy for lightpath -> let's
 	lightPathProxy, err := labels.NewRequirement(proxyapis.LabelServiceProxyName, selection.Equals, []string{wellknown.LightpathProxyName})
 	if err != nil {
 		return err

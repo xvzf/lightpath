@@ -1,0 +1,5 @@
+namespace: grafana-agent
+resources:
+- ns.yaml
+- sts.yaml
+- cm.yaml

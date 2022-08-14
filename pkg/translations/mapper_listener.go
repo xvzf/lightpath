@@ -6,6 +6,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
 )
 
 // MapServicePortToListeners creats a virtual listener for each IP:port combination
@@ -16,6 +17,12 @@ func (km *KubeMapper) MapServicePortToListeners(svc *v1.Service, port *v1.Servic
 
 	// map ClusterIP
 	for _, ip := range svc.Spec.ClusterIPs {
+		// filter out explicit None ClusterIP addresses which don't have the v1.IsHeadlessService label
+		if ip == "None" {
+			klog.Warning("Service is headless but is not labeled accordingly", "service", svc.Name, "namespace", svc.Namespace)
+			continue
+		}
+
 		targetClusterName := getClusterName(svc.Namespace, svc.Name, string(ipStringToIpFamily(ip)), port.TargetPort.IntVal)
 		listenerName := getListenerName(svc.Namespace, svc.Name, ip, port.Port)
 
