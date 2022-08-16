@@ -15,7 +15,7 @@ spec:
       hostNetwork: true # required
       serviceAccountName: proxy
       containers:
-        - image: envoyproxy/envoy:v1.23.0
+        - image: envoyproxy/envoy:v1.22-latest
           name: envoy
           env:
             - name: NODE_NAME
