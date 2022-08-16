@@ -94,7 +94,12 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 						}}, // Action
 					}},
 					// Configure retries for the rotue
-					RetryPolicy: &route.RetryPolicy{},
+					RetryPolicy: &route.RetryPolicy{
+						RetryOn:           portSettings.RetryOn,
+						NumRetries:        wrapperspb.UInt32(portSettings.NumRetries),
+						PerTryTimeout:     durationpb.New(portSettings.UpstreamRequestTimeout),
+						PerTryIdleTimeout: durationpb.New(portSettings.UpstreamIdleTimeout),
+					},
 				},
 				},
 			}, // route.RouteConfiguratio
