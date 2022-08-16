@@ -13,6 +13,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -25,11 +26,29 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 		panic(err) // this should never happen!
 	}
 
-	// Access log config; just the envoy defaults for now.
+	// Access log config (JSON)
 	accessLogConfig, err := anypb.New(&streamaccessloggerv3.StdoutAccessLog{
 		AccessLogFormat: &streamaccessloggerv3.StdoutAccessLog_LogFormat{
 			LogFormat: &corev3.SubstitutionFormatString{
-				Format: &corev3.SubstitutionFormatString_TextFormat{},
+				Format: &corev3.SubstitutionFormatString_JsonFormat{
+					JsonFormat: &structpb.Struct{
+						Fields: map[string]*structpb.Value{
+							// Based on the default log line
+							"start_time":     {Kind: &structpb.Value_StringValue{StringValue: "%START_TIME%"}},
+							"method":         {Kind: &structpb.Value_StringValue{StringValue: "%REQ(:METHOD)%"}},
+							"authority":      {Kind: &structpb.Value_StringValue{StringValue: "%REQ(:AUTHORITY)%"}},
+							"path":           {Kind: &structpb.Value_StringValue{StringValue: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"}},
+							"protocol":       {Kind: &structpb.Value_StringValue{StringValue: "%PROTOCOL%"}},
+							"response_code":  {Kind: &structpb.Value_StringValue{StringValue: "%RESPONSE_CODE%"}},
+							"response_flags": {Kind: &structpb.Value_StringValue{StringValue: "%RESPONSE_FLAGS%"}},
+							"bytes_received": {Kind: &structpb.Value_StringValue{StringValue: "%BYTES_RECEIVED%"}},
+							"bytes_sent":     {Kind: &structpb.Value_StringValue{StringValue: "%BYTES_SENT%"}},
+							"duration":       {Kind: &structpb.Value_StringValue{StringValue: "%DURATION%"}},
+							"request_id":     {Kind: &structpb.Value_StringValue{StringValue: "%REQ(X-REQUEST-ID)%"}},
+							"upstream_host":  {Kind: &structpb.Value_StringValue{StringValue: "%UPSTREAM_HOST%"}},
+						},
+					},
+				},
 			},
 		},
 	})
