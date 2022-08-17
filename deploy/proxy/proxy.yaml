@@ -11,6 +11,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: proxy
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/stats/prometheus"
+        prometheus.io/port: "15000"
     spec:
       hostNetwork: true # required
       serviceAccountName: proxy
