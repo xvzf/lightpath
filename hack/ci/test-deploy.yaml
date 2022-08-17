@@ -12,6 +12,7 @@ metadata:
 spec:
   selector:
     app: whoami
+  type: LoadBalancer
   ports:
     - protocol: TCP
       name: http
