@@ -65,15 +65,18 @@ func (km *KubeMapper) extractEndpointMetaAndState(endpointslices []*discoveryv1.
 
 func (km *KubeMapper) mapEndpointMetaAndStateToEndpoint(meta endpointMeta, state endpointState) *endpoint.LbEndpoint {
 
-	var healthStatus core.HealthStatus
-	if state.terminating {
-		healthStatus = core.HealthStatus_DRAINING
-	} else {
-		healthStatus = core.HealthStatus_HEALTHY
-	}
+	/*
+		var healthStatus core.HealthStatus
+		if state.terminating {
+			healthStatus = core.HealthStatus_DRAINING
+		} else {
+			healthStatus = core.HealthStatus_HEALTHY
+		}
+	*/
 
 	return &endpoint.LbEndpoint{
-		HealthStatus: healthStatus,
+		// HealthStatus: healthStatus,
+		HealthStatus: core.HealthStatus_HEALTHY,
 		HostIdentifier: &endpoint.LbEndpoint_Endpoint{
 			Endpoint: &endpoint.Endpoint{
 				Hostname: fmt.Sprintf("%s-%d", meta.ip, meta.port),
