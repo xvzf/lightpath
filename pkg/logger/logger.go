@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/go-logr/logr"
 	"k8s.io/klog/v2/klogr"
@@ -58,7 +59,14 @@ func (l *logger) GetLogger() logr.Logger {
 func sanitize(in []interface{}) []interface{} {
 	out := make([]interface{}, 0, len(in))
 	for _, v := range in {
-		out = append(out, fmt.Sprintf("%v", v))
+		// We have to check if the type is hashable; otherwise we risk a panic at runtime
+		kind := reflect.TypeOf(v).Kind()
+		isHashable := kind < reflect.Array || kind == reflect.Ptr || kind == reflect.UnsafePointer
+		if isHashable {
+			out = append(out, fmt.Sprintf("%v", v))
+		} else {
+			out = append(out, "__non_hashable_type__")
+		}
 	}
 	return out
 }
