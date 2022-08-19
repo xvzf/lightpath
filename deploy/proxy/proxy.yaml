@@ -11,6 +11,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: proxy
+      annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/stats/prometheus"
         prometheus.io/port: "15000"
