@@ -23,6 +23,10 @@ const (
 	PortUpstreamConnectTimeout        = "upstream-connect-timeout" // default: 5
 	PortUpstreamConnectTimeoutDefault = 5 * time.Second
 
+	// LoadBalancing Algorithm
+	LoadBalancingPolicy        = "lb-policy"
+	LoadBalancingPolicyDefault = "LEAST_REQUEST"
+
 	// Retries
 	PortRetryEnabled = "retry-enabled" // default: enabled
 	PortRetryOn      = "retry-on"      // default HTTP: gateway-error,reset,connect-failure,

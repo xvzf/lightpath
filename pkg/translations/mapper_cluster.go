@@ -30,7 +30,7 @@ func (km *KubeMapper) MapServicePortToClusters(svc *v1.Service, port *v1.Service
 					ConfigSourceSpecifier: &core.ConfigSource_Ads{},
 				},
 			},
-			LbPolicy: cluster.Cluster_LEAST_REQUEST, // FIXME make configureable
+			LbPolicy: portSettings.LoadBalancingPolicy, // FIXME make configureable
 		}
 
 		// HTTP cluster specific settings

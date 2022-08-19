@@ -3,8 +3,10 @@ package translations
 import (
 	"time"
 
+	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	"github.com/xvzf/lightpath/pkg/wellknown"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 )
 
@@ -26,6 +28,23 @@ func getProtocol(port *v1.ServicePort) Protocol {
 	return PROTOCOL_TCP
 }
 
+func getLbPolicy(lbPolicy string) cluster.Cluster_LbPolicy {
+	switch lbPolicy {
+	case "LEAST_REQUEST":
+		return cluster.Cluster_LEAST_REQUEST
+	case "ROUND_ROBIN":
+		return cluster.Cluster_ROUND_ROBIN
+	case "MAGLEV":
+		return cluster.Cluster_MAGLEV
+	case "RANDOM":
+		return cluster.Cluster_RANDOM
+	case "RING_HASH":
+		return cluster.Cluster_RING_HASH
+	}
+	klog.Warning("LB Policy unsupported", "policy", lbPolicy)
+	return cluster.Cluster_LEAST_REQUEST
+}
+
 type PortSettings struct {
 	// Port protocol
 	Protocol Protocol
@@ -44,11 +63,17 @@ type PortSettings struct {
 	RetryOn     string
 	NumRetries  uint32
 
+	// Loadbalancing algorithm
+	LoadBalancingPolicy cluster.Cluster_LbPolicy
+
 	// FIXME add circuit breaking defaults
 }
 
 func getPortSetings(svc *v1.Service, port *v1.ServicePort) *PortSettings {
 	protocol := getProtocol(port)
+	lbPolicy := getLbPolicy(
+		getStringConfig(svc, port, wellknown.LoadBalancingPolicy, wellknown.LoadBalancingPolicyDefault),
+	)
 
 	return &PortSettings{
 		Protocol: protocol,
@@ -63,5 +88,7 @@ func getPortSetings(svc *v1.Service, port *v1.ServicePort) *PortSettings {
 		EnableRetry: getBoolConfig(svc, port, wellknown.PortRetryEnabled, wellknown.PortRetryEnabledDefault),
 		RetryOn:     getStringConfig(svc, port, wellknown.PortRetryOn, wellknown.PortRetryOnDefault), // HTTP only, ignored for TCP; there just the connection attempts will be mapped
 		NumRetries:  getUint32Config(svc, port, wellknown.PortNumRetries, wellknown.PortNumRetriesDefault),
+		// LB config
+		LoadBalancingPolicy: lbPolicy,
 	}
 }
