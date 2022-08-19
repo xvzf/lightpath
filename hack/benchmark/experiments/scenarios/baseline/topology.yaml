@@ -15,22 +15,22 @@ services:
     - call: svc2
 # 1st subtree
 - name: svc1
-  errorRate: 2%
+  errorRate: 0%
   script:
   - call: svc3
 - name: svc3
-  errorRate: 5%
+  errorRate: 0%
 # 2nd subtree
 - name: svc2
-  errorRate: 5%
+  errorRate: 0%
   script:
   - - call: svc4
     - call: svc5
 - name: svc4
   errorRate: 0%
 - name: svc5
-  errorRate: 10%
+  errorRate: 0%%%
   script:
   - call: svc6
 - name: svc6
-  errorRate: 10%
+  errorRate: 0%%%

@@ -13,18 +13,18 @@ digraph {
 
   "svc1" [label=<
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-  <TR><TD><B>svc1</B><BR />Type: HTTP<BR />Err: 2.00%</TD></TR>
+  <TR><TD><B>svc1</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
   <TR><TD PORT="0">CALL "svc3" 16KiB</TD></TR>
 </TABLE>>];
 
   "svc3" [label=<
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-  <TR><TD><B>svc3</B><BR />Type: HTTP<BR />Err: 5.00%</TD></TR>
+  <TR><TD><B>svc3</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
 </TABLE>>];
 
   "svc2" [label=<
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-  <TR><TD><B>svc2</B><BR />Type: HTTP<BR />Err: 5.00%</TD></TR>
+  <TR><TD><B>svc2</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
   <TR><TD PORT="0">CALL "svc4" 16KiB<BR />CALL "svc5" 16KiB</TD></TR>
 </TABLE>>];
 
@@ -35,13 +35,13 @@ digraph {
 
   "svc5" [label=<
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-  <TR><TD><B>svc5</B><BR />Type: HTTP<BR />Err: 10.00%</TD></TR>
+  <TR><TD><B>svc5</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
   <TR><TD PORT="0">CALL "svc6" 16KiB</TD></TR>
 </TABLE>>];
 
   "svc6" [label=<
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
-  <TR><TD><B>svc6</B><BR />Type: HTTP<BR />Err: 10.00%</TD></TR>
+  <TR><TD><B>svc6</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
 </TABLE>>];
 
   

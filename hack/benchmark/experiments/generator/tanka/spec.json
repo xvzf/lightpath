@@ -5,7 +5,7 @@
     "name": "environments/default"
   },
   "spec": {
-    "namespace": "topology",
+    "namespace": "scenario",
     "resourceDefaults": {},
     "expectVersions": {}
   }
