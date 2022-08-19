@@ -17,8 +17,42 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+// Access log config (JSON)
+var stdoutAccessLogConfig = &streamaccessloggerv3.StdoutAccessLog{
+	AccessLogFormat: &streamaccessloggerv3.StdoutAccessLog_LogFormat{
+		LogFormat: &corev3.SubstitutionFormatString{
+			Format: &corev3.SubstitutionFormatString_JsonFormat{
+				JsonFormat: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						// Based on the default log line
+						"start_time":                     {Kind: &structpb.Value_StringValue{StringValue: "%START_TIME%"}},
+						"method":                         {Kind: &structpb.Value_StringValue{StringValue: "%REQ(:METHOD)%"}},
+						"authority":                      {Kind: &structpb.Value_StringValue{StringValue: "%REQ(:AUTHORITY)%"}},
+						"path":                           {Kind: &structpb.Value_StringValue{StringValue: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"}},
+						"protocol":                       {Kind: &structpb.Value_StringValue{StringValue: "%PROTOCOL%"}},
+						"response_code":                  {Kind: &structpb.Value_StringValue{StringValue: "%RESPONSE_CODE%"}},
+						"response_flags":                 {Kind: &structpb.Value_StringValue{StringValue: "%RESPONSE_FLAGS%"}},
+						"bytes_received":                 {Kind: &structpb.Value_StringValue{StringValue: "%BYTES_RECEIVED%"}},
+						"bytes_sent":                     {Kind: &structpb.Value_StringValue{StringValue: "%BYTES_SENT%"}},
+						"duration":                       {Kind: &structpb.Value_StringValue{StringValue: "%DURATION%"}},
+						"request_id":                     {Kind: &structpb.Value_StringValue{StringValue: "%REQ(X-REQUEST-ID)%"}},
+						"upstream_host":                  {Kind: &structpb.Value_StringValue{StringValue: "%UPSTREAM_HOST%"}},
+						"upstream_request_attempt_count": {Kind: &structpb.Value_StringValue{StringValue: "%UPSTREAM_REQUEST_ATTEMPT_COUNT%"}},
+						"downstream_remote_address":      {Kind: &structpb.Value_StringValue{StringValue: "%DOWNSTREAM_REMOTE_ADDRESS%"}},
+					},
+				},
+			},
+		},
+	},
+}
+
 // genTCPListener creates a new listener with a name, ip address, port and targetCluster.
 func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClusterName string) []*listener.FilterChain {
+
+	accessLogConfig, err := anypb.New(stdoutAccessLogConfig)
+	if err != nil {
+		panic(err) // this should never happen!
+	}
 
 	// Bootstrap router config
 	routerConfig, err := anypb.New(&router.Router{})
@@ -26,39 +60,7 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 		panic(err) // this should never happen!
 	}
 
-	// Access log config (JSON)
-	accessLogConfig, err := anypb.New(&streamaccessloggerv3.StdoutAccessLog{
-		AccessLogFormat: &streamaccessloggerv3.StdoutAccessLog_LogFormat{
-			LogFormat: &corev3.SubstitutionFormatString{
-				Format: &corev3.SubstitutionFormatString_JsonFormat{
-					JsonFormat: &structpb.Struct{
-						Fields: map[string]*structpb.Value{
-							// Based on the default log line
-							"start_time":                     {Kind: &structpb.Value_StringValue{StringValue: "%START_TIME%"}},
-							"method":                         {Kind: &structpb.Value_StringValue{StringValue: "%REQ(:METHOD)%"}},
-							"authority":                      {Kind: &structpb.Value_StringValue{StringValue: "%REQ(:AUTHORITY)%"}},
-							"path":                           {Kind: &structpb.Value_StringValue{StringValue: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"}},
-							"protocol":                       {Kind: &structpb.Value_StringValue{StringValue: "%PROTOCOL%"}},
-							"response_code":                  {Kind: &structpb.Value_StringValue{StringValue: "%RESPONSE_CODE%"}},
-							"response_flags":                 {Kind: &structpb.Value_StringValue{StringValue: "%RESPONSE_FLAGS%"}},
-							"bytes_received":                 {Kind: &structpb.Value_StringValue{StringValue: "%BYTES_RECEIVED%"}},
-							"bytes_sent":                     {Kind: &structpb.Value_StringValue{StringValue: "%BYTES_SENT%"}},
-							"duration":                       {Kind: &structpb.Value_StringValue{StringValue: "%DURATION%"}},
-							"request_id":                     {Kind: &structpb.Value_StringValue{StringValue: "%REQ(X-REQUEST-ID)%"}},
-							"upstream_host":                  {Kind: &structpb.Value_StringValue{StringValue: "%UPSTREAM_HOST%"}},
-							"upstream_request_attempt_count": {Kind: &structpb.Value_StringValue{StringValue: "%UPSTREAM_REQUEST_ATTEMPT_COUNT%"}},
-							"downstream_remote_address":      {Kind: &structpb.Value_StringValue{StringValue: "%DOWNSTREAM_REMOTE_ADDRESS%"}},
-						},
-					},
-				},
-			},
-		},
-	})
-	if err != nil {
-		panic(err) // this should never happen!
-	}
-
-	tcpProxy, err := anypb.New(&hcm.HttpConnectionManager{
+	hcm := &hcm.HttpConnectionManager{
 		StatPrefix: "source_http",
 		// Configure sane defaults
 		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
@@ -80,13 +82,6 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 			Name: wellknown.Router,
 			ConfigType: &hcm.HttpFilter_TypedConfig{
 				TypedConfig: routerConfig,
-			},
-		}},
-		// Access logging
-		AccessLog: []*accesslogv3.AccessLog{{
-			Name: "envoy.access_loggers.stdout", // FIXME this should be a well-known
-			ConfigType: &accesslogv3.AccessLog_TypedConfig{
-				TypedConfig: accessLogConfig,
 			},
 		}},
 		// Route configuration; we just have one default route here.
@@ -125,7 +120,19 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 				},
 			}, // route.RouteConfiguratio
 		}, // hcm.HttpConnectionManager_RouteConfig
-	})
+	}
+
+	// Add AccessLog configuration in case it is enabled
+	if portSettings.AccessLog {
+		hcm.AccessLog = []*accesslogv3.AccessLog{{
+			Name: "envoy.access_loggers.stdout", // FIXME this should be a well-known
+			ConfigType: &accesslogv3.AccessLog_TypedConfig{
+				TypedConfig: accessLogConfig,
+			},
+		}}
+	}
+
+	tcpProxy, err := anypb.New(hcm)
 	if err != nil {
 		panic(err) // Should never happen
 	}

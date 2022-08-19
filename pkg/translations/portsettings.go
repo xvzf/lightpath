@@ -63,6 +63,9 @@ type PortSettings struct {
 	RetryOn     string
 	NumRetries  uint32
 
+	// AccessLog
+	AccessLog bool
+
 	// Loadbalancing algorithm
 	LoadBalancingPolicy cluster.Cluster_LbPolicy
 
@@ -90,5 +93,7 @@ func getPortSetings(svc *v1.Service, port *v1.ServicePort) *PortSettings {
 		NumRetries:  getUint32Config(svc, port, wellknown.PortNumRetries, wellknown.PortNumRetriesDefault),
 		// LB config
 		LoadBalancingPolicy: lbPolicy,
+		// AccessLog
+		AccessLog: getBoolConfig(svc, port, wellknown.AccessLog, wellknown.AccessLogDefault),
 	}
 }

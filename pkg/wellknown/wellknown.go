@@ -23,6 +23,10 @@ const (
 	PortUpstreamConnectTimeout        = "upstream-connect-timeout" // default: 5
 	PortUpstreamConnectTimeoutDefault = 5 * time.Second
 
+	// Access Logging
+	AccessLog        = "access-log"
+	AccessLogDefault = true
+
 	// LoadBalancing Algorithm
 	LoadBalancingPolicy        = "lb-policy"
 	LoadBalancingPolicyDefault = "LEAST_REQUEST"
