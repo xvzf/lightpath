@@ -27,7 +27,7 @@ func getListenerName(namespace, name, ip string, port int32) string {
 }
 
 func getPortSettingsAnnotationsKey(svc *v1.Service, port *v1.ServicePort, setting string) string {
-	return fmt.Sprintf("%s%s/%s", wellknown.PortConfigAnnotationPrefix, port.Name, setting)
+	return fmt.Sprintf("%s%s-%s", wellknown.PortConfigAnnotationPrefix, port.Name, setting)
 }
 
 func getUint32Config(svc *v1.Service, port *v1.ServicePort, setting string, defaultValue uint32) uint32 {

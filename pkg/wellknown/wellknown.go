@@ -9,7 +9,7 @@ const (
 	LightpathEnvoyPort         = 1666
 
 	// Per port configuration options
-	PortConfigAnnotationPrefix = "config.lightpath.cloud/" // matches `<prefix>/<port-name>/...`
+	PortConfigAnnotationPrefix = "config.lightpath.cloud/" // matches `<prefix>/<port-name>-...`
 
 	// Timeouts
 	PortIdleTimeout                   = "idle-timeout" // default: 300
