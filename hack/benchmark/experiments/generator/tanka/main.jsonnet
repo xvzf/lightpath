@@ -50,17 +50,26 @@ local topologyYaml = importstr '../topology.yaml';
 
       service_lightpath:
         k.util.serviceFor(self.deployment, nameFormat='%(port)s')
-        + if ($._config.topology.defaults + svc).isEntrypoint
+        + self.entrypoint_mixin
+        + self.lightpath_disable_mixin,
+
+      entrypoint_mixin::
+        if ($._config.topology.defaults + svc).isEntrypoint
         then
           k.core.v1.service.spec.withType('NodePort')
         else {},
 
-      service_kube_proxy:
-        self.service_lightpath
-        + k.core.v1.service.metadata.withName('%s-kube-proxy' % self.service_lightpath.metadata.name)
-        + k.core.v1.service.metadata.withLabelsMixin({
-          "lightpath.cloud/proxy": "disabled"
-        })
+      lightpath_disable_mixin::
+        if std.extVar('LIGHTPATH_DISABLED') == 'true'
+        then
+          k.core.v1.service.metadata.withLabelsMixin({
+            'lightpath.cloud/proxy': 'disabled',
+          })
+        else
+          k.core.v1.service.metadata.withAnnotationsMixin({
+            // disable access log; it decrases performance and kube-proxy does not log either
+            'config.lightpath.cloud/http-access-log': 'disabled',
+          }),
     }
 
     for svc in $._config.topology.services

@@ -50,6 +50,8 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    config.lightpath.cloud/http-access-log: disabled
   labels:
     name: gateway
   name: gateway
@@ -66,23 +68,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: gateway
-  name: gateway-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: gateway
-  type: NodePort
----
-apiVersion: v1
-kind: Service
-metadata:
+  annotations:
+    config.lightpath.cloud/http-access-log: disabled
   labels:
     name: svc1
   name: svc1
@@ -98,22 +85,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: svc1
-  name: svc1-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc1
----
-apiVersion: v1
-kind: Service
-metadata:
+  annotations:
+    config.lightpath.cloud/http-access-log: disabled
   labels:
     name: svc2
   name: svc2
@@ -129,22 +102,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: svc2
-  name: svc2-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc2
----
-apiVersion: v1
-kind: Service
-metadata:
+  annotations:
+    config.lightpath.cloud/http-access-log: disabled
   labels:
     name: svc3
   name: svc3
@@ -160,22 +119,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: svc3
-  name: svc3-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc3
----
-apiVersion: v1
-kind: Service
-metadata:
+  annotations:
+    config.lightpath.cloud/http-access-log: disabled
   labels:
     name: svc4
   name: svc4
@@ -191,22 +136,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: svc4
-  name: svc4-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc4
----
-apiVersion: v1
-kind: Service
-metadata:
+  annotations:
+    config.lightpath.cloud/http-access-log: disabled
   labels:
     name: svc5
   name: svc5
@@ -222,41 +153,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: svc5
-  name: svc5-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc5
----
-apiVersion: v1
-kind: Service
-metadata:
+  annotations:
+    config.lightpath.cloud/http-access-log: disabled
   labels:
     name: svc6
   name: svc6
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc6
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: svc6
-  name: svc6-kube-proxy
   namespace: scenario
 spec:
   ports:

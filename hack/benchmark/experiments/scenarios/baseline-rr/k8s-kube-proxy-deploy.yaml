@@ -37,11 +37,11 @@ data:
     - name: svc4
       errorRate: 0%
     - name: svc5
-      errorRate: 0%%%
+      errorRate: 0%
       script:
       - call: svc6
     - name: svc6
-      errorRate: 0%%%
+      errorRate: 0%
 kind: ConfigMap
 metadata:
   name: config
@@ -51,6 +51,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    lightpath.cloud/proxy: disabled
     name: gateway
   name: gateway
   namespace: scenario
@@ -68,22 +69,6 @@ kind: Service
 metadata:
   labels:
     lightpath.cloud/proxy: disabled
-    name: gateway
-  name: gateway-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: gateway
-  type: NodePort
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
     name: svc1
   name: svc1
   namespace: scenario
@@ -100,21 +85,6 @@ kind: Service
 metadata:
   labels:
     lightpath.cloud/proxy: disabled
-    name: svc1
-  name: svc1-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc1
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
     name: svc2
   name: svc2
   namespace: scenario
@@ -131,21 +101,6 @@ kind: Service
 metadata:
   labels:
     lightpath.cloud/proxy: disabled
-    name: svc2
-  name: svc2-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc2
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
     name: svc3
   name: svc3
   namespace: scenario
@@ -162,21 +117,6 @@ kind: Service
 metadata:
   labels:
     lightpath.cloud/proxy: disabled
-    name: svc3
-  name: svc3-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc3
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
     name: svc4
   name: svc4
   namespace: scenario
@@ -193,21 +133,6 @@ kind: Service
 metadata:
   labels:
     lightpath.cloud/proxy: disabled
-    name: svc4
-  name: svc4-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc4
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
     name: svc5
   name: svc5
   namespace: scenario
@@ -224,39 +149,8 @@ kind: Service
 metadata:
   labels:
     lightpath.cloud/proxy: disabled
-    name: svc5
-  name: svc5-kube-proxy
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc5
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
     name: svc6
   name: svc6
-  namespace: scenario
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    name: svc6
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    lightpath.cloud/proxy: disabled
-    name: svc6
-  name: svc6-kube-proxy
   namespace: scenario
 spec:
   ports:
@@ -281,7 +175,7 @@ spec:
   template:
     metadata:
       annotations:
-        config-hash: 554572546f3d0534754abae5c0bdd7b9
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
@@ -328,7 +222,7 @@ spec:
   template:
     metadata:
       annotations:
-        config-hash: 554572546f3d0534754abae5c0bdd7b9
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
@@ -375,7 +269,7 @@ spec:
   template:
     metadata:
       annotations:
-        config-hash: 554572546f3d0534754abae5c0bdd7b9
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
@@ -422,7 +316,7 @@ spec:
   template:
     metadata:
       annotations:
-        config-hash: 554572546f3d0534754abae5c0bdd7b9
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
@@ -469,7 +363,7 @@ spec:
   template:
     metadata:
       annotations:
-        config-hash: 554572546f3d0534754abae5c0bdd7b9
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
@@ -516,7 +410,7 @@ spec:
   template:
     metadata:
       annotations:
-        config-hash: 554572546f3d0534754abae5c0bdd7b9
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
@@ -563,7 +457,7 @@ spec:
   template:
     metadata:
       annotations:
-        config-hash: 554572546f3d0534754abae5c0bdd7b9
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
         prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"

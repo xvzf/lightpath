@@ -1,0 +1,54 @@
+digraph {
+  node [
+    fontsize = "16"
+    fontname = "courier"
+    shape = plaintext
+  ];
+
+  "gateway" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>gateway</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc1" 16KiB<BR />CALL "svc2" 16KiB</TD></TR>
+</TABLE>>];
+
+  "svc1" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc1</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc3" 16KiB</TD></TR>
+</TABLE>>];
+
+  "svc3" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc3</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+</TABLE>>];
+
+  "svc2" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc2</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc4" 16KiB<BR />CALL "svc5" 16KiB</TD></TR>
+</TABLE>>];
+
+  "svc4" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc4</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+</TABLE>>];
+
+  "svc5" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc5</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+  <TR><TD PORT="0">CALL "svc6" 16KiB</TD></TR>
+</TABLE>>];
+
+  "svc6" [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+  <TR><TD><B>svc6</B><BR />Type: HTTP<BR />Err: 0.00%</TD></TR>
+</TABLE>>];
+
+  
+  "gateway":0 -> "svc1"
+  "gateway":0 -> "svc2"
+  "svc1":0 -> "svc3"
+  "svc2":0 -> "svc4"
+  "svc2":0 -> "svc5"
+  "svc5":0 -> "svc6"
+}
