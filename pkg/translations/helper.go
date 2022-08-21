@@ -35,9 +35,9 @@ func getUint32Config(svc *v1.Service, port *v1.ServicePort, setting string, defa
 
 	if orig, ok := svc.Annotations[key]; ok {
 		if res, err := strconv.ParseInt(orig, 10, 64); err != nil {
-			return uint32(res)
-		} else {
 			klog.Warningf("Invalid %s=%s on service %s/%s, error: %s", key, orig, svc.Namespace, svc.Name, err.Error())
+		} else {
+			return uint32(res)
 		}
 	}
 	return defaultValue
@@ -53,9 +53,9 @@ func getBoolConfig(svc *v1.Service, port *v1.ServicePort, setting string, defaul
 
 	if orig, ok := svc.Annotations[key]; ok {
 		if res, err := strconv.ParseBool(orig); err != nil {
-			return res
-		} else {
 			klog.Warningf("Invalid for %s on service %s/%s", key, svc.Namespace, svc.Name)
+		} else {
+			return res
 		}
 	}
 	return defaultValue
