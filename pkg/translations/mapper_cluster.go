@@ -31,7 +31,7 @@ func (km *KubeMapper) MapServicePortToClusters(svc *v1.Service, port *v1.Service
 					ConfigSourceSpecifier: &core.ConfigSource_Ads{},
 				},
 			},
-			LbPolicy: portSettings.LoadBalancingPolicy, // FIXME make configureable
+			LbPolicy: portSettings.LoadBalancingPolicy,
 
 			CircuitBreakers: &cluster.CircuitBreakers{
 				Thresholds: []*cluster.CircuitBreakers_Thresholds{
@@ -52,6 +52,40 @@ func (km *KubeMapper) MapServicePortToClusters(svc *v1.Service, port *v1.Service
 						TrackRemaining:     portSettings.CircuitBreakerHighTrackRemaining,
 					},
 				},
+			},
+
+			OutlierDetection: &cluster.OutlierDetection{
+				// Configureable outlier detection params
+
+				// Interval _ ejection time
+				Interval:         durationpb.New(portSettings.OutlierDetectionInterval),
+				BaseEjectionTime: durationpb.New(portSettings.OutlierDetectionBaseEjectionTime),
+				MaxEjectionTime:  durationpb.New(portSettings.OutlierDetectionMaxEjectionTime),
+
+				// Stability
+				MaxEjectionPercent: wrapperspb.UInt32(portSettings.OutlierDetectionMaxEjectionPercent),
+
+				// Error
+				Consecutive_5Xx:           wrapperspb.UInt32(portSettings.OutlierDetectionConsecutive5xx),
+				ConsecutiveGatewayFailure: wrapperspb.UInt32(portSettings.OutlierDetectionConsecutiveGatewayFailure),
+
+				// Default values not configureable so far
+				// ConsecutiveLocalOriginFailure: wrapperspb.UInt32(5),
+				// EnforcingConsecutive_5Xx:               wrapperspb.UInt32(100),
+				// EnforcingSuccessRate:                   wrapperspb.UInt32(100),
+				// SuccessRateMinimumHosts:                wrapperspb.UInt32(5),
+				// SuccessRateRequestVolume:               wrapperspb.UInt32(100),
+				// SuccessRateStdevFactor:                 wrapperspb.UInt32(1900),
+				// EnforcingConsecutiveGatewayFailure:     wrapperspb.UInt32(100),
+				// SplitExternalLocalOriginErrors:         false,
+				// EnforcingConsecutiveLocalOriginFailure: wrapperspb.UInt32(100),
+				// EnforcingLocalOriginSuccessRate:        wrapperspb.UInt32(100),
+				// FailurePercentageThreshold:             wrapperspb.UInt32(85),
+				// EnforcingFailurePercentage:             wrapperspb.UInt32(0),
+				// EnforcingFailurePercentageLocalOrigin:  wrapperspb.UInt32(0),
+				// FailurePercentageMinimumHosts:          wrapperspb.UInt32(5),
+				// FailurePercentageRequestVolume:         wrapperspb.UInt32(50),
+				// MaxEjectionTimeJitter:                  durationpb.New(0 * time.Second),
 			},
 		}
 

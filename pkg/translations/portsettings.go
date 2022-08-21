@@ -75,6 +75,14 @@ type PortSettings struct {
 	CircuitBreakerHighMaxRetries            uint32
 	CircuitBreakerHighTrackRemaining        bool
 
+	// Outlier Detection
+	OutlierDetectionInterval                  time.Duration
+	OutlierDetectionBaseEjectionTime          time.Duration
+	OutlierDetectionMaxEjectionTime           time.Duration
+	OutlierDetectionMaxEjectionPercent        uint32
+	OutlierDetectionConsecutive5xx            uint32
+	OutlierDetectionConsecutiveGatewayFailure uint32
+
 	// AccessLog
 	AccessLog bool
 
@@ -107,16 +115,25 @@ func getPortSetings(svc *v1.Service, port *v1.ServicePort) *PortSettings {
 		NumRetries:  getUint32Config(svc, port, wellknown.PortNumRetries, wellknown.PortNumRetriesDefault),
 
 		// CircuitBreaker
-		CircuitBreakerDefaultMaxConnections:     getUint32Config(svc, port, wellknown.CircuitBreakerDefaultMaxConnections, wellknown.CircuitBreakerDefaultMaxConnectionsDefault),
-		CircuitBreakerDefaultMaxPendingRequests: getUint32Config(svc, port, wellknown.CircuitBreakerDefaultMaxPendingRequests, wellknown.CircuitBreakerDefaultMaxPendingRequestsDefault),
-		CircuitBreakerDefaultMaxRequests:        getUint32Config(svc, port, wellknown.CircuitBreakerDefaultMaxRequests, wellknown.CircuitBreakerDefaultMaxRequestsDefault),
-		CircuitBreakerDefaultMaxRetries:         getUint32Config(svc, port, wellknown.CircuitBreakerDefaultMaxRetries, wellknown.CircuitBreakerDefaultMaxRetriesDefault),
-		CircuitBreakerDefaultTrackRemaining:     getBoolConfig(svc, port, wellknown.CircuitBreakerDefaultTrackRemaining, wellknown.CircuitBreakerDefaultTrackRemainingDefault),
-		CircuitBreakerHighMaxConnections:        getUint32Config(svc, port, wellknown.CircuitBreakerHighMaxConnections, wellknown.CircuitBreakerHighMaxConnectionsDefault),
-		CircuitBreakerHighMaxPendingRequests:    getUint32Config(svc, port, wellknown.CircuitBreakerHighMaxPendingRequests, wellknown.CircuitBreakerHighMaxPendingRequestsDefault),
-		CircuitBreakerHighMaxRequests:           getUint32Config(svc, port, wellknown.CircuitBreakerHighMaxRequests, wellknown.CircuitBreakerHighMaxRequestsDefault),
-		CircuitBreakerHighMaxRetries:            getUint32Config(svc, port, wellknown.CircuitBreakerHighMaxRetries, wellknown.CircuitBreakerHighMaxRetriesDefault),
-		CircuitBreakerHighTrackRemaining:        getBoolConfig(svc, port, wellknown.CircuitBreakerHighTrackRemaining, wellknown.CircuitBreakerHighTrackRemainingDefault),
+		CircuitBreakerDefaultMaxConnections:     getUint32Config(svc, port, wellknown.PortCircuitBreakerDefaultMaxConnections, wellknown.PortCircuitBreakerDefaultMaxConnectionsDefault),
+		CircuitBreakerDefaultMaxPendingRequests: getUint32Config(svc, port, wellknown.PortCircuitBreakerDefaultMaxPendingRequests, wellknown.PortCircuitBreakerDefaultMaxPendingRequestsDefault),
+		CircuitBreakerDefaultMaxRequests:        getUint32Config(svc, port, wellknown.PortCircuitBreakerDefaultMaxRequests, wellknown.PortCircuitBreakerDefaultMaxRequestsDefault),
+		CircuitBreakerDefaultMaxRetries:         getUint32Config(svc, port, wellknown.PortCircuitBreakerDefaultMaxRetries, wellknown.PortCircuitBreakerDefaultMaxRetriesDefault),
+		CircuitBreakerDefaultTrackRemaining:     getBoolConfig(svc, port, wellknown.PortCircuitBreakerDefaultTrackRemaining, wellknown.PortCircuitBreakerDefaultTrackRemainingDefault),
+		CircuitBreakerHighMaxConnections:        getUint32Config(svc, port, wellknown.PortCircuitBreakerHighMaxConnections, wellknown.PortCircuitBreakerHighMaxConnectionsDefault),
+		CircuitBreakerHighMaxPendingRequests:    getUint32Config(svc, port, wellknown.PortCircuitBreakerHighMaxPendingRequests, wellknown.PortCircuitBreakerHighMaxPendingRequestsDefault),
+		CircuitBreakerHighMaxRequests:           getUint32Config(svc, port, wellknown.PortCircuitBreakerHighMaxRequests, wellknown.PortCircuitBreakerHighMaxRequestsDefault),
+		CircuitBreakerHighMaxRetries:            getUint32Config(svc, port, wellknown.PortCircuitBreakerHighMaxRetries, wellknown.PortCircuitBreakerHighMaxRetriesDefault),
+		CircuitBreakerHighTrackRemaining:        getBoolConfig(svc, port, wellknown.PortCircuitBreakerHighTrackRemaining, wellknown.PortCircuitBreakerHighTrackRemainingDefault),
+
+		// Outlier Detection
+		OutlierDetectionInterval:         getDurationConfig(svc, port, wellknown.PortOutlierDetectionInterval, wellknown.PortOutlierDetectionIntervalDefault),
+		OutlierDetectionBaseEjectionTime: getDurationConfig(svc, port, wellknown.PortOutlierDetectionBaseEjectionTime, wellknown.PortOutlierDetectionBaseEjectionTimeDefault),
+		OutlierDetectionMaxEjectionTime:  getDurationConfig(svc, port, wellknown.PortOutlierDetectionMaxEjectionTime, wellknown.PortOutlierDetectionMaxEjectionTimeDefault),
+
+		OutlierDetectionMaxEjectionPercent: getUint32Config(svc, port, wellknown.PortOutlierDetectionMaxEjectionPercent, wellknown.PortOutlierDetectionMaxEjectionPercentDefault),
+		OutlierDetectionMaxEjectionPercent: getUint32Config(svc, port, wellknown.PortOutlierDetectionMaxEjectionPercent, wellknown.PortOutlierDetectionMaxEjectionPercentDefault),
+		OutlierDetectionConsecutive5xx:     getUint32Config(svc, port, wellknown.PortOutlierDetectionConsecutive5xx, wellknown.PortOutlierDetectionConsecutive5xxDefault),
 
 		// LB config
 		LoadBalancingPolicy: lbPolicy,
