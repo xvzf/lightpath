@@ -40,6 +40,32 @@ const (
 	PortNumRetriesDefault   = 2
 	PortRetryOnDefault      = "5xx,reset,retriable-headers" // default retry options for HTTP
 
+	// Circuit Breaking (per-cluster-level); "disabled" by default
+	// There's no option to disable circuit-breaking envoy-side -> set it to very high values
+	// in order to pseudo-disable it.
+	// Default route priority
+	CircuitBreakerDefaultMaxConnections            = "circuit-breaker-default-max-connections"
+	CircuitBreakerDefaultMaxConnectionsDefault     = 1000000000
+	CircuitBreakerDefaultMaxPendingRequests        = "circuit-breaker-default-max-pending-requests"
+	CircuitBreakerDefaultMaxPendingRequestsDefault = 1000000000
+	CircuitBreakerDefaultMaxRequests               = "circuit-breaker-default-max-requests"
+	CircuitBreakerDefaultMaxRequestsDefault        = 1000000000
+	CircuitBreakerDefaultMaxRetries                = "circuit-breaker-default-max-retries"
+	CircuitBreakerDefaultMaxRetriesDefault         = 3
+	CircuitBreakerDefaultTrackRemaining            = "circuit-breaker-default-track-remaining"
+	CircuitBreakerDefaultTrackRemainingDefault     = false
+	// High route priority
+	CircuitBreakerHighMaxConnections            = "circuit-breaker-high-max-connections"
+	CircuitBreakerHighMaxConnectionsDefault     = 1000000000
+	CircuitBreakerHighMaxPendingRequests        = "circuit-breaker-high-max-pending-requests"
+	CircuitBreakerHighMaxPendingRequestsDefault = 1000000000
+	CircuitBreakerHighMaxRequests               = "circuit-breaker-high-max-requests"
+	CircuitBreakerHighMaxRequestsDefault        = 1000000000
+	CircuitBreakerHighMaxRetries                = "circuit-breaker-high-max-retries"
+	CircuitBreakerHighMaxRetriesDefault         = 3
+	CircuitBreakerHighTrackRemaining            = "circuit-breaker-high-track-remaining"
+	CircuitBreakerHighTrackRemainingDefault     = false
+
 	// Application protocols supported by lightpath
 	AppProtocolTCP   = "tcp"
 	AppProtocolHTTP  = "http"

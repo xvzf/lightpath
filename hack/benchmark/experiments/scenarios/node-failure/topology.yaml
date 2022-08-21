@@ -1,0 +1,36 @@
+apiVersion: v1alpha1
+kind: MockServiceGraph
+defaults:
+  type: http
+  requestSize: 16 KB
+  isEntrypoint: false
+  responseSize: 16 KB
+
+services:
+- name: gateway
+  errorRate: 0%
+  isEntrypoint: true
+  script:
+  - - call: svc1
+    - call: svc2
+# 1st subtree
+- name: svc1
+  errorRate: 0%
+  script:
+  - call: svc3
+- name: svc3
+  errorRate: 0%
+# 2nd subtree
+- name: svc2
+  errorRate: 0%
+  script:
+  - - call: svc4
+    - call: svc5
+- name: svc4
+  errorRate: 0%
+- name: svc5
+  errorRate: 0%
+  script:
+  - call: svc6
+- name: svc6
+  errorRate: 0%

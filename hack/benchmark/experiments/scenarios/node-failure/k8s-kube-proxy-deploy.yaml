@@ -1,0 +1,490 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-proxy
+---
+apiVersion: v1
+data:
+  service-graph.yaml: |
+    apiVersion: v1alpha1
+    kind: MockServiceGraph
+    defaults:
+      type: http
+      requestSize: 16 KB
+      isEntrypoint: false
+      responseSize: 16 KB
+
+    services:
+    - name: gateway
+      errorRate: 0%
+      isEntrypoint: true
+      script:
+      - - call: svc1
+        - call: svc2
+    # 1st subtree
+    - name: svc1
+      errorRate: 0%
+      script:
+      - call: svc3
+    - name: svc3
+      errorRate: 0%
+    # 2nd subtree
+    - name: svc2
+      errorRate: 0%
+      script:
+      - - call: svc4
+        - call: svc5
+    - name: svc4
+      errorRate: 0%
+    - name: svc5
+      errorRate: 0%
+      script:
+      - call: svc6
+    - name: svc6
+      errorRate: 0%
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: kube-proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    lightpath.cloud/proxy: disabled
+    name: gateway
+  name: gateway
+  namespace: kube-proxy
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    name: gateway
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    lightpath.cloud/proxy: disabled
+    name: svc1
+  name: svc1
+  namespace: kube-proxy
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    name: svc1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    lightpath.cloud/proxy: disabled
+    name: svc2
+  name: svc2
+  namespace: kube-proxy
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    name: svc2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    lightpath.cloud/proxy: disabled
+    name: svc3
+  name: svc3
+  namespace: kube-proxy
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    name: svc3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    lightpath.cloud/proxy: disabled
+    name: svc4
+  name: svc4
+  namespace: kube-proxy
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    name: svc4
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    lightpath.cloud/proxy: disabled
+    name: svc5
+  name: svc5
+  namespace: kube-proxy
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    name: svc5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    lightpath.cloud/proxy: disabled
+    name: svc6
+  name: svc6
+  namespace: kube-proxy
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    name: svc6
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: kube-proxy
+spec:
+  minReadySeconds: 10
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: gateway
+  template:
+    metadata:
+      annotations:
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: gateway
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: gateway
+        image: ghcr.io/xvzf/lightpath/isotope:latest@sha256:06a7ff55479c9b16de75f8d9285f72d89afdf05e1e807bda8a67ca751fe7b062
+        imagePullPolicy: Always
+        name: performance-test
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config
+      volumes:
+      - configMap:
+          name: config
+        name: config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc1
+  namespace: kube-proxy
+spec:
+  minReadySeconds: 10
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: svc1
+  template:
+    metadata:
+      annotations:
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: svc1
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: svc1
+        image: ghcr.io/xvzf/lightpath/isotope:latest@sha256:06a7ff55479c9b16de75f8d9285f72d89afdf05e1e807bda8a67ca751fe7b062
+        imagePullPolicy: Always
+        name: performance-test
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config
+      volumes:
+      - configMap:
+          name: config
+        name: config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc2
+  namespace: kube-proxy
+spec:
+  minReadySeconds: 10
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: svc2
+  template:
+    metadata:
+      annotations:
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: svc2
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: svc2
+        image: ghcr.io/xvzf/lightpath/isotope:latest@sha256:06a7ff55479c9b16de75f8d9285f72d89afdf05e1e807bda8a67ca751fe7b062
+        imagePullPolicy: Always
+        name: performance-test
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config
+      volumes:
+      - configMap:
+          name: config
+        name: config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc3
+  namespace: kube-proxy
+spec:
+  minReadySeconds: 10
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: svc3
+  template:
+    metadata:
+      annotations:
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: svc3
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: svc3
+        image: ghcr.io/xvzf/lightpath/isotope:latest@sha256:06a7ff55479c9b16de75f8d9285f72d89afdf05e1e807bda8a67ca751fe7b062
+        imagePullPolicy: Always
+        name: performance-test
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config
+      volumes:
+      - configMap:
+          name: config
+        name: config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc4
+  namespace: kube-proxy
+spec:
+  minReadySeconds: 10
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: svc4
+  template:
+    metadata:
+      annotations:
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: svc4
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: svc4
+        image: ghcr.io/xvzf/lightpath/isotope:latest@sha256:06a7ff55479c9b16de75f8d9285f72d89afdf05e1e807bda8a67ca751fe7b062
+        imagePullPolicy: Always
+        name: performance-test
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config
+      volumes:
+      - configMap:
+          name: config
+        name: config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc5
+  namespace: kube-proxy
+spec:
+  minReadySeconds: 10
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: svc5
+  template:
+    metadata:
+      annotations:
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: svc5
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: svc5
+        image: ghcr.io/xvzf/lightpath/isotope:latest@sha256:06a7ff55479c9b16de75f8d9285f72d89afdf05e1e807bda8a67ca751fe7b062
+        imagePullPolicy: Always
+        name: performance-test
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config
+      volumes:
+      - configMap:
+          name: config
+        name: config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc6
+  namespace: kube-proxy
+spec:
+  minReadySeconds: 10
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: svc6
+  template:
+    metadata:
+      annotations:
+        config-hash: d8eb09fbc48f376fb9b71faae6da9383
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        name: svc6
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: svc6
+        image: ghcr.io/xvzf/lightpath/isotope:latest@sha256:06a7ff55479c9b16de75f8d9285f72d89afdf05e1e807bda8a67ca751fe7b062
+        imagePullPolicy: Always
+        name: performance-test
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config
+      volumes:
+      - configMap:
+          name: config
+        name: config

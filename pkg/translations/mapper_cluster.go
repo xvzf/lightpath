@@ -5,6 +5,7 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -31,6 +32,27 @@ func (km *KubeMapper) MapServicePortToClusters(svc *v1.Service, port *v1.Service
 				},
 			},
 			LbPolicy: portSettings.LoadBalancingPolicy, // FIXME make configureable
+
+			CircuitBreakers: &cluster.CircuitBreakers{
+				Thresholds: []*cluster.CircuitBreakers_Thresholds{
+					{
+						Priority:           core.RoutingPriority_DEFAULT,
+						MaxConnections:     wrapperspb.UInt32(portSettings.CircuitBreakerDefaultMaxConnections),
+						MaxPendingRequests: wrapperspb.UInt32(portSettings.CircuitBreakerDefaultMaxPendingRequests),
+						MaxRequests:        wrapperspb.UInt32(portSettings.CircuitBreakerDefaultMaxRequests),
+						MaxRetries:         wrapperspb.UInt32(portSettings.CircuitBreakerDefaultMaxRetries),
+						TrackRemaining:     portSettings.CircuitBreakerDefaultTrackRemaining,
+					},
+					{
+						Priority:           core.RoutingPriority_HIGH,
+						MaxConnections:     wrapperspb.UInt32(portSettings.CircuitBreakerHighMaxConnections),
+						MaxPendingRequests: wrapperspb.UInt32(portSettings.CircuitBreakerHighMaxPendingRequests),
+						MaxRequests:        wrapperspb.UInt32(portSettings.CircuitBreakerHighMaxRequests),
+						MaxRetries:         wrapperspb.UInt32(portSettings.CircuitBreakerHighMaxRetries),
+						TrackRemaining:     portSettings.CircuitBreakerHighTrackRemaining,
+					},
+				},
+			},
 		}
 
 		// HTTP cluster specific settings
