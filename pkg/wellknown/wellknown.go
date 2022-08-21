@@ -75,8 +75,8 @@ const (
 	PortOutlierDetectionMaxEjectionTimeDefault           = 300 * time.Second
 	PortOutlierDetectionMaxEjectionPercent               = "outlier-detection-max-ejection-percent"
 	PortOutlierDetectionMaxEjectionPercentDefault        = 10
-	PortOutlierDetectionConsecutive_5Xx                  = "outlier-detection-consecutive-5xx"
-	PortOutlierDetectionConsecutive_5XxDefault           = 5
+	PortOutlierDetectionConsecutive5xx                   = "outlier-detection-consecutive-5xx"
+	PortOutlierDetectionConsecutive5xxDefault            = 5
 	PortOutlierDetectionConsecutiveGatewayFailure        = "outlier-detection-consecutive-gateway-failure"
 	PortOutlierDetectionConsecutiveGatewayFailureDefault = 5
 

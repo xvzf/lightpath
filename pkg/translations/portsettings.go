@@ -131,9 +131,9 @@ func getPortSetings(svc *v1.Service, port *v1.ServicePort) *PortSettings {
 		OutlierDetectionBaseEjectionTime: getDurationConfig(svc, port, wellknown.PortOutlierDetectionBaseEjectionTime, wellknown.PortOutlierDetectionBaseEjectionTimeDefault),
 		OutlierDetectionMaxEjectionTime:  getDurationConfig(svc, port, wellknown.PortOutlierDetectionMaxEjectionTime, wellknown.PortOutlierDetectionMaxEjectionTimeDefault),
 
-		OutlierDetectionMaxEjectionPercent: getUint32Config(svc, port, wellknown.PortOutlierDetectionMaxEjectionPercent, wellknown.PortOutlierDetectionMaxEjectionPercentDefault),
-		OutlierDetectionMaxEjectionPercent: getUint32Config(svc, port, wellknown.PortOutlierDetectionMaxEjectionPercent, wellknown.PortOutlierDetectionMaxEjectionPercentDefault),
-		OutlierDetectionConsecutive5xx:     getUint32Config(svc, port, wellknown.PortOutlierDetectionConsecutive5xx, wellknown.PortOutlierDetectionConsecutive5xxDefault),
+		OutlierDetectionMaxEjectionPercent:        getUint32Config(svc, port, wellknown.PortOutlierDetectionMaxEjectionPercent, wellknown.PortOutlierDetectionMaxEjectionPercentDefault),
+		OutlierDetectionConsecutive5xx:            getUint32Config(svc, port, wellknown.PortOutlierDetectionConsecutive5xx, wellknown.PortOutlierDetectionConsecutive5xxDefault),
+		OutlierDetectionConsecutiveGatewayFailure: getUint32Config(svc, port, wellknown.PortOutlierDetectionConsecutiveGatewayFailure, wellknown.PortOutlierDetectionConsecutiveGatewayFailureDefault),
 
 		// LB config
 		LoadBalancingPolicy: lbPolicy,
