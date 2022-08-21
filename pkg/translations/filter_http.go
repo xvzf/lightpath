@@ -10,6 +10,7 @@ import (
 	streamaccessloggerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/stream/v3"
 	router "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	previoushostv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/retry/host/previous_hosts/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -56,6 +57,12 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 
 	// Bootstrap router config
 	routerConfig, err := anypb.New(&router.Router{})
+	if err != nil {
+		panic(err) // this should never happen!
+	}
+
+	// Previous host retry predicate
+	retryPreviousHostPredicate, err := anypb.New(&previoushostv3.PreviousHostsPredicate{})
 	if err != nil {
 		panic(err) // this should never happen!
 	}
@@ -115,6 +122,14 @@ func (km *KubeMapper) genHTTPFilterChain(portSettings *PortSettings, targetClust
 						NumRetries:        wrapperspb.UInt32(portSettings.NumRetries),
 						PerTryTimeout:     durationpb.New(portSettings.UpstreamRequestTimeout),
 						PerTryIdleTimeout: durationpb.New(portSettings.UpstreamIdleTimeout),
+						RetryHostPredicate: []*route.RetryPolicy_RetryHostPredicate{
+							&route.RetryPolicy_RetryHostPredicate{
+								Name: "envoy.retry_host_predicates.previous_hosts", // FIXME should be a well-known
+								ConfigType: &route.RetryPolicy_RetryHostPredicate_TypedConfig{
+									TypedConfig: retryPreviousHostPredicate,
+								},
+							},
+						},
 					},
 				},
 				},
