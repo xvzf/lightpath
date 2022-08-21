@@ -34,10 +34,10 @@ func getUint32Config(svc *v1.Service, port *v1.ServicePort, setting string, defa
 	key := getPortSettingsAnnotationsKey(svc, port, setting)
 
 	if orig, ok := svc.Annotations[key]; ok {
-		if res, err := strconv.ParseInt(orig, 10, 32); err != nil {
+		if res, err := strconv.ParseInt(orig, 10, 64); err != nil {
 			return uint32(res)
 		} else {
-			klog.Warningf("Invalid %s=%s on service %s/%s", key, orig, svc.Namespace, svc.Name)
+			klog.Warningf("Invalid %s=%s on service %s/%s, error: %s", key, orig, svc.Namespace, svc.Name, err.Error())
 		}
 	}
 	return defaultValue
