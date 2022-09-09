@@ -1,6 +1,6 @@
 {
   "RunType": "HTTP",
-  "Labels": "simulated-error-rate",
+  "Labels": "simulated-error-rate,kube-proxy",
   "StartTime": "2022-08-19T14:21:57.518710341Z",
   "RequestedQPS": "500",
   "RequestedDuration": "1m0s",

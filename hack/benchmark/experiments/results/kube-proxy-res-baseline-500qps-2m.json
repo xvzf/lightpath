@@ -1,6 +1,6 @@
 {
   "RunType": "HTTP",
-  "Labels": "baseline",
+  "Labels": "baseline,kube-proxy",
   "StartTime": "2022-08-19T13:45:34.014072145Z",
   "RequestedQPS": "500",
   "RequestedDuration": "2m0s",

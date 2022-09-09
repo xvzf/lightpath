@@ -1,6 +1,6 @@
 {
   "RunType": "HTTP",
-  "Labels": "simulated-error-rate",
+  "Labels": "simulated-error-rate,lightpath,least-request",
   "StartTime": "2022-08-19T14:28:30.909917923Z",
   "RequestedQPS": "500",
   "RequestedDuration": "1m0s",

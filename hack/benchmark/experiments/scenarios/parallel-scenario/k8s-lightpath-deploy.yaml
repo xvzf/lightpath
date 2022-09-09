@@ -52,6 +52,11 @@ kind: Service
 metadata:
   annotations:
     config.lightpath.cloud/http-access-log: disabled
+    config.lightpath.cloud/http-circuit-breaker-default-max-retries: "10"
+    config.lightpath.cloud/http-num-retries: "4"
+    config.lightpath.cloud/http-outlier-detection-consecutive-gateway-failure: "2"
+    config.lightpath.cloud/http-outlier-detection-interval: "3"
+
   labels:
     name: gateway
   name: gateway
@@ -70,6 +75,10 @@ kind: Service
 metadata:
   annotations:
     config.lightpath.cloud/http-access-log: disabled
+    config.lightpath.cloud/http-circuit-breaker-default-max-retries: "10"
+    config.lightpath.cloud/http-num-retries: "4"
+    config.lightpath.cloud/http-outlier-detection-consecutive-gateway-failure: "2"
+    config.lightpath.cloud/http-outlier-detection-interval: "3"
   labels:
     name: svc1
   name: svc1
@@ -87,6 +96,10 @@ kind: Service
 metadata:
   annotations:
     config.lightpath.cloud/http-access-log: disabled
+    config.lightpath.cloud/http-circuit-breaker-default-max-retries: "10"
+    config.lightpath.cloud/http-num-retries: "4"
+    config.lightpath.cloud/http-outlier-detection-consecutive-gateway-failure: "2"
+    config.lightpath.cloud/http-outlier-detection-interval: "3"
   labels:
     name: svc2
   name: svc2
@@ -104,6 +117,10 @@ kind: Service
 metadata:
   annotations:
     config.lightpath.cloud/http-access-log: disabled
+    config.lightpath.cloud/http-circuit-breaker-default-max-retries: "10"
+    config.lightpath.cloud/http-num-retries: "4"
+    config.lightpath.cloud/http-outlier-detection-consecutive-gateway-failure: "2"
+    config.lightpath.cloud/http-outlier-detection-interval: "3"
   labels:
     name: svc3
   name: svc3
@@ -121,6 +138,10 @@ kind: Service
 metadata:
   annotations:
     config.lightpath.cloud/http-access-log: disabled
+    config.lightpath.cloud/http-circuit-breaker-default-max-retries: "10"
+    config.lightpath.cloud/http-num-retries: "4"
+    config.lightpath.cloud/http-outlier-detection-consecutive-gateway-failure: "2"
+    config.lightpath.cloud/http-outlier-detection-interval: "3"
   labels:
     name: svc4
   name: svc4
@@ -138,6 +159,10 @@ kind: Service
 metadata:
   annotations:
     config.lightpath.cloud/http-access-log: disabled
+    config.lightpath.cloud/http-circuit-breaker-default-max-retries: "10"
+    config.lightpath.cloud/http-num-retries: "4"
+    config.lightpath.cloud/http-outlier-detection-consecutive-gateway-failure: "2"
+    config.lightpath.cloud/http-outlier-detection-interval: "3"
   labels:
     name: svc5
   name: svc5
@@ -155,6 +180,10 @@ kind: Service
 metadata:
   annotations:
     config.lightpath.cloud/http-access-log: disabled
+    config.lightpath.cloud/http-circuit-breaker-default-max-retries: "10"
+    config.lightpath.cloud/http-num-retries: "4"
+    config.lightpath.cloud/http-outlier-detection-consecutive-gateway-failure: "2"
+    config.lightpath.cloud/http-outlier-detection-interval: "3"
   labels:
     name: svc6
   name: svc6

@@ -1,6 +1,6 @@
 {
   "RunType": "HTTP",
-  "Labels": "baseline",
+  "Labels": "baseline,lightpath,round-robin",
   "StartTime": "2022-08-19T14:12:10.654718734Z",
   "RequestedQPS": "1000",
   "RequestedDuration": "1m0s",
