@@ -9,6 +9,10 @@ kind: Service
 metadata:
   name: whoami
   namespace: whoami
+  annotations:
+    # Disable outlier detection and retries to simulate kube-proxy activity
+    config.lightpath.cloud/http-retry-enabled: disabled # disable retries
+    config.lightpath.cloud/outlier-detection-max-ejection-percent: "0" # don't allow outlier ejection
 spec:
   selector:
     app: whoami
@@ -39,6 +43,11 @@ spec:
       containers:
         - name: whoami
           image: traefik/whoami:latest
+          readinessProbe:
+            httpGet:
+              path: /health # we can control the exit code using curl -XPOST -d'500' http://localhost:80/health
+              port: 80
+            periodSeconds: 10 # default
           ports:
             - containerPort: 80
               name: http

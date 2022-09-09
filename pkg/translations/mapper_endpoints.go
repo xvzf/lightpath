@@ -69,6 +69,9 @@ func (km *KubeMapper) mapEndpointMetaAndStateToEndpoint(meta endpointMeta, state
 	if state.terminating {
 		healthStatus = core.HealthStatus_DRAINING
 	}
+	if !state.ready {
+		healthStatus = core.HealthStatus_UNHEALTHY
+	}
 
 	return &endpoint.LbEndpoint{
 		HealthStatus: healthStatus,
