@@ -51,7 +51,7 @@ test_create_patch_service_without_label_field {
 				"kind": "Service",
 				"version": "v1",
 			},
-			"object": {"metadata": {}},
+			"object": {"metadata": {}, "spec": {"ports": [{"protocol": "TCP"}]}},
 		},
 	}
 
@@ -74,7 +74,7 @@ test_create_patch_service_with_label_field {
 				"kind": "Service",
 				"version": "v1",
 			},
-			"object": {"metadata": {"labels": {"test": "test"}}},
+			"object": {"metadata": {"labels": {"test": "test"}}, "spec": {"ports": [{"protocol": "TCP"}]}},
 		},
 	}
 
@@ -139,6 +139,25 @@ test_create_patch_well_known_excluded_namespace {
 				"namespace": "kube-system",
 				"labels": {"service.kubernetes.io/service-proxy-name": "kube-proxy"},
 			}},
+		},
+	}
+
+	resp
+	payload := resp.response
+	payload.allowed
+	count(patch) == 0
+}
+
+test_create_non_supported_protocol {
+	resp := mutate with input as {
+		"kind": "AdmissionReview",
+		"request": {
+			"operation": "CREATE",
+			"kind": {
+				"kind": "Service",
+				"version": "v1",
+			},
+			"object": {"metadata": {"labels": {"test": "test"}}, "spec": {"ports": [{"protocol": "UDP"}]}},
 		},
 	}
 

@@ -1,5 +1,7 @@
 package lightpath.webhook
 
+import future.keywords.in
+
 req_uid := input.request.uid
 
 mutate = {
@@ -25,6 +27,10 @@ well_known_exclusions = [
 patch_conditions {
 	# Only trigger on create or update
 	input.request.operation == "CREATE"
+
+  # match only TCP services
+  some port in input.request.object.spec.ports
+	not port.protocol != "TCP"
 
 	# Only applies when the label does not exist
 	not input.request.object.metadata.labels["service.kubernetes.io/service-proxy-name"]
