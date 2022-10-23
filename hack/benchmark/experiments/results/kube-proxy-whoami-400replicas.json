@@ -1,0 +1,199 @@
+{
+  "RunType": "HTTP",
+  "Labels": "whoami,kube-proxy,400replicas",
+  "StartTime": "2022-09-25T19:17:23.472555311Z",
+  "RequestedQPS": "100",
+  "RequestedDuration": "1m0s",
+  "ActualQPS": 99.98480676536121,
+  "ActualDuration": 60009117326,
+  "NumThreads": 10,
+  "Version": "1.35.0",
+  "DurationHistogram": {
+    "Count": 6000,
+    "Min": 0.000225367,
+    "Max": 0.009593748,
+    "Sum": 2.884031404,
+    "Avg": 0.00048067190066666663,
+    "StdDev": 0.00034347774826930374,
+    "Data": [
+      {
+        "Start": 0.000225367,
+        "End": 0.001,
+        "Percent": 99.08333333333333,
+        "Count": 5945
+      },
+      {
+        "Start": 0.001,
+        "End": 0.002,
+        "Percent": 99.38333333333334,
+        "Count": 18
+      },
+      {
+        "Start": 0.002,
+        "End": 0.003,
+        "Percent": 99.48333333333333,
+        "Count": 6
+      },
+      {
+        "Start": 0.003,
+        "End": 0.004,
+        "Percent": 99.73333333333333,
+        "Count": 15
+      },
+      {
+        "Start": 0.004,
+        "End": 0.005,
+        "Percent": 99.83333333333333,
+        "Count": 6
+      },
+      {
+        "Start": 0.005,
+        "End": 0.006,
+        "Percent": 99.9,
+        "Count": 4
+      },
+      {
+        "Start": 0.006,
+        "End": 0.007,
+        "Percent": 99.95,
+        "Count": 3
+      },
+      {
+        "Start": 0.007,
+        "End": 0.008,
+        "Percent": 99.96666666666667,
+        "Count": 1
+      },
+      {
+        "Start": 0.008,
+        "End": 0.009000000000000001,
+        "Percent": 99.98333333333333,
+        "Count": 1
+      },
+      {
+        "Start": 0.009000000000000001,
+        "End": 0.009593748,
+        "Percent": 100,
+        "Count": 1
+      }
+    ],
+    "Percentiles": [
+      {
+        "Percentile": 50,
+        "Value": 0.000616202189602961
+      },
+      {
+        "Percentile": 75,
+        "Value": 0.0008116849453230148
+      },
+      {
+        "Percentile": 90,
+        "Value": 0.0009289745987550471
+      },
+      {
+        "Percentile": 99,
+        "Value": 0.0009993483908142665
+      },
+      {
+        "Percentile": 99.9,
+        "Value": 0.006
+      }
+    ]
+  },
+  "ErrorsDurationHistogram": {
+    "Count": 0,
+    "Min": 0,
+    "Max": 0,
+    "Sum": 0,
+    "Avg": 0,
+    "StdDev": 0,
+    "Data": null,
+    "Percentiles": null
+  },
+  "Exactly": 0,
+  "Jitter": true,
+  "Uniform": false,
+  "NoCatchUp": false,
+  "RunID": 0,
+  "AccessLoggerInfo": "",
+  "ID": "2022-09-25-191723_whoami_kube_proxy_400replicas",
+  "RetCodes": {
+    "200": 6000
+  },
+  "IPCountMap": {
+    "10.96.242.231:80": 10
+  },
+  "Insecure": false,
+  "CACert": "",
+  "Cert": "",
+  "Key": "",
+  "UnixDomainSocket": "",
+  "URL": "http://10.96.242.231:80/",
+  "NumConnections": 1,
+  "Compression": false,
+  "DisableFastClient": false,
+  "HTTP10": false,
+  "DisableKeepAlive": false,
+  "AllowHalfClose": false,
+  "FollowRedirects": false,
+  "Resolve": "",
+  "HTTPReqTimeOut": 3000000000,
+  "UserCredentials": "",
+  "ContentType": "",
+  "Payload": "",
+  "LogErrors": true,
+  "SequentialWarmup": false,
+  "ConnReuseRange": [
+    0,
+    0
+  ],
+  "NoResolveEachConn": false,
+  "Sizes": {
+    "Count": 6000,
+    "Min": 329,
+    "Max": 332,
+    "Sum": 1983600,
+    "Avg": 330.6,
+    "StdDev": 0.8,
+    "Data": [
+      {
+        "Start": 329,
+        "End": 332,
+        "Percent": 100,
+        "Count": 6000
+      }
+    ],
+    "Percentiles": null
+  },
+  "HeaderSizes": {
+    "Count": 6000,
+    "Min": 118,
+    "Max": 118,
+    "Sum": 708000,
+    "Avg": 118,
+    "StdDev": 0,
+    "Data": [
+      {
+        "Start": 118,
+        "End": 118,
+        "Percent": 100,
+        "Count": 6000
+      }
+    ],
+    "Percentiles": null
+  },
+  "Sockets": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "SocketCount": 10,
+  "AbortOn": 0
+}

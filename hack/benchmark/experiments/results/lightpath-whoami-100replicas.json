@@ -1,0 +1,211 @@
+{
+  "RunType": "HTTP",
+  "Labels": "whoami,lightpath,100replicas",
+  "StartTime": "2022-09-25T19:20:51.283769334Z",
+  "RequestedQPS": "100",
+  "RequestedDuration": "1m0s",
+  "ActualQPS": 99.98188502545092,
+  "ActualDuration": 60010870954,
+  "NumThreads": 10,
+  "Version": "1.35.0",
+  "DurationHistogram": {
+    "Count": 6000,
+    "Min": 0.000415221,
+    "Max": 0.013531173,
+    "Sum": 4.839353454,
+    "Avg": 0.000806558909,
+    "StdDev": 0.0005057900830602031,
+    "Data": [
+      {
+        "Start": 0.000415221,
+        "End": 0.001,
+        "Percent": 89.61666666666666,
+        "Count": 5377
+      },
+      {
+        "Start": 0.001,
+        "End": 0.002,
+        "Percent": 99.21666666666667,
+        "Count": 576
+      },
+      {
+        "Start": 0.002,
+        "End": 0.003,
+        "Percent": 99.41666666666667,
+        "Count": 12
+      },
+      {
+        "Start": 0.003,
+        "End": 0.004,
+        "Percent": 99.61666666666666,
+        "Count": 12
+      },
+      {
+        "Start": 0.004,
+        "End": 0.005,
+        "Percent": 99.71666666666667,
+        "Count": 6
+      },
+      {
+        "Start": 0.005,
+        "End": 0.006,
+        "Percent": 99.8,
+        "Count": 5
+      },
+      {
+        "Start": 0.006,
+        "End": 0.007,
+        "Percent": 99.81666666666666,
+        "Count": 1
+      },
+      {
+        "Start": 0.007,
+        "End": 0.008,
+        "Percent": 99.88333333333334,
+        "Count": 4
+      },
+      {
+        "Start": 0.009000000000000001,
+        "End": 0.01,
+        "Percent": 99.9,
+        "Count": 1
+      },
+      {
+        "Start": 0.01,
+        "End": 0.011,
+        "Percent": 99.91666666666667,
+        "Count": 1
+      },
+      {
+        "Start": 0.011,
+        "End": 0.012,
+        "Percent": 99.95,
+        "Count": 2
+      },
+      {
+        "Start": 0.012,
+        "End": 0.013531173,
+        "Percent": 100,
+        "Count": 3
+      }
+    ],
+    "Percentiles": [
+      {
+        "Percentile": 50,
+        "Value": 0.0007414397911086311
+      },
+      {
+        "Percentile": 75,
+        "Value": 0.0009046035745907739
+      },
+      {
+        "Percentile": 90,
+        "Value": 0.0010399305555555563
+      },
+      {
+        "Percentile": 99,
+        "Value": 0.001977430555555555
+      },
+      {
+        "Percentile": 99.9,
+        "Value": 0.01
+      }
+    ]
+  },
+  "ErrorsDurationHistogram": {
+    "Count": 0,
+    "Min": 0,
+    "Max": 0,
+    "Sum": 0,
+    "Avg": 0,
+    "StdDev": 0,
+    "Data": null,
+    "Percentiles": null
+  },
+  "Exactly": 0,
+  "Jitter": true,
+  "Uniform": false,
+  "NoCatchUp": false,
+  "RunID": 0,
+  "AccessLoggerInfo": "",
+  "ID": "2022-09-25-192051_whoami_lightpath_100replicas",
+  "RetCodes": {
+    "200": 6000
+  },
+  "IPCountMap": {
+    "10.96.240.174:80": 10
+  },
+  "Insecure": false,
+  "CACert": "",
+  "Cert": "",
+  "Key": "",
+  "UnixDomainSocket": "",
+  "URL": "http://10.96.240.174:80/",
+  "NumConnections": 1,
+  "Compression": false,
+  "DisableFastClient": false,
+  "HTTP10": false,
+  "DisableKeepAlive": false,
+  "AllowHalfClose": false,
+  "FollowRedirects": false,
+  "Resolve": "",
+  "HTTPReqTimeOut": 3000000000,
+  "UserCredentials": "",
+  "ContentType": "",
+  "Payload": "",
+  "LogErrors": true,
+  "SequentialWarmup": false,
+  "ConnReuseRange": [
+    0,
+    0
+  ],
+  "NoResolveEachConn": false,
+  "Sizes": {
+    "Count": 6000,
+    "Min": 518,
+    "Max": 522,
+    "Sum": 3124710,
+    "Avg": 520.785,
+    "StdDev": 0.6822328537109315,
+    "Data": [
+      {
+        "Start": 518,
+        "End": 522,
+        "Percent": 100,
+        "Count": 6000
+      }
+    ],
+    "Percentiles": null
+  },
+  "HeaderSizes": {
+    "Count": 6000,
+    "Min": 167,
+    "Max": 168,
+    "Sum": 1002006,
+    "Avg": 167.001,
+    "StdDev": 0.03160696122649949,
+    "Data": [
+      {
+        "Start": 167,
+        "End": 168,
+        "Percent": 100,
+        "Count": 6000
+      }
+    ],
+    "Percentiles": null
+  },
+  "Sockets": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "SocketCount": 10,
+  "AbortOn": 0
+}
