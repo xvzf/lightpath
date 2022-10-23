@@ -144,3 +144,7 @@ func BenchmarkSvc1000Pods150000Nodes5000(b *testing.B) {
 func BenchmarkSvc10000Pods150000Nodes5000(b *testing.B) {
 	benchmarkTranslations(10000, 150000, 5000, b)
 }
+
+func BenchmarkSvc15000Pods150000Nodes5000(b *testing.B) {
+	benchmarkTranslations(10000, 150000, 5000, b)
+}
