@@ -66,3 +66,7 @@ k8s-up:
 .PHONY: k8s-down
 k8s-down:
 	kind delete cluster --name=lightpath-ci
+
+.PHONY: deploy
+deploy:
+	kubectl apply -k deploy/default/
