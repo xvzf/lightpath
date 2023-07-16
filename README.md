@@ -1,24 +1,46 @@
-# Lightpath - a kube-proxy replacement based on Envoy
+# Lightpath - a kube-proxy replacement based on Envoy (PoC)
+
+> :warning: This software by no means production ready! It is neither feature complete nor has full test coverage!
+
+Lightpath has been the underlying reference-implementation for my Master Thesis *Evaluating the usage of protocol-aware proxies as replacement for kube-proxy*. It's been published [here](https://stl.htwsaar.de/tr/STL-TR-2023-02.pdf)
+
+
+# TL;DR Research Results
+The layer 7 proxy Envoy has proven to be effective for adding visibility and increasing the reliability of microservices.
+While the layer 7 processing comes with the tradeoff of consuming more compute resources, Lightpath outperformed the kube-proxy implementation in terms of consistency, overload handling, and reliability.
+However, for most requests, the layer 4 operations of kube-proxy are more efficient on the latency, resulting in a 61% latency decrease for 50% of subjected requests compared to Lightpath.
+Considering the tail-latency distributions and the total average, Envoy improves the situation with a 25.7% lower average latency, and there are up to 80% improvements for the 99th latency percentile.
+The connection latency can be decreased by leveraging the eBPF technology instead of iptables for redirecting requests to ClusterIPs or ExternalIPs to Envoy.
+
+The advanced traffic control options (circuitbreaking, retries, ...) improve application resilience and allow to decrease application code complexity further, e.g. by offloading retry operations to Envoy, which has full knowledge of the system topology.
+
+Using the system topology and reacting to passive health checks allows quicker reactivity to changes on endpoints or the network state.
+An interesting idea would be to transfer information on passively detected failures to Kubernetes, which otherwise would wait for a periodically executed active health check to fail.
+
+As Kubernetes is also considered in a more distributed deployment model with edge computing, the reactivity of individual nodes which might not have consistent network connectivity speeds or latency would likely improve the availability and consistency.
+In this context, the option for optimizing load balancing for latency by using e.g. a peak exponentially-weighed moving average based algorithm could improve reactivity further.
+
+## Components
 
 Lightpath consists of multiple data plane and control plane components:
 1. **Control Plane**:
-  - `controlplane` (node-scoped): runs on every node and acts as control server for Envoy
+  - `controlplane` (node-scoped): runs on every node and acts as control server for Envoy. Could eventuall scoped per failure-domain.
   - `webook` (cluster-scoped): The webhook components intercepts the service creation and updates the handling proxy to Lightpath. This allows a hybrid deployment next to the kube-proxy
 2. **Data Plane**:
   - `proxy`(node-scoped): Envoy acts as proxy instance and is configured to connect to the node-local control plane
   - `redirect` configures the iptables redirect targets for ClusterIPs handled by Lightpath
 
-# Limitations
+## Limitations
 As a PoC, the TCP and HTTP protocol are targeted. STCP and UDP based protocols are not supported (yet) and need to be handled by kube-proxy. Therefore, a hybrid setup is required for full service connectivity.
 
-# Deployment
+## Deployment
 
 Lightpath can be deployed on any Kubernetes Cluster with an iptables based CNI (e.g. Calico, Flannel, ...).
 
-## Test cluster
+### Test cluster
 The `make k8s-up` command bootstraps a new [Kubernetes in Docker](https://kind.sigs.k8s.io/docs/user/quick-start/), which can be used for further testing
 
-## Deploying
+### Deploying
 > Lightpath images are (publicly) available for linux/amd64 and linux/arm64.
 
 The deployment manifests are based on [Kustomize](http://kustomize.io) and are generated with `kustomize build deploy/default/`. Lightpath requires cert-manager to be installed on the tareted cluster; the installation will fail otherwise. The `make k8s-up` command already setups all required dependencies.
@@ -54,7 +76,7 @@ $ curl http://localhost:15000/config_dump
 # ...
 ```
 
-# Repository Structure
+## Repository Structure
 
 Overall, the repository acts as mono-repository for all lightpath components, configuration and performed benchmarks performed throughout the master thesis.
 
